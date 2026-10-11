@@ -14,13 +14,6 @@
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400&display=swap" rel="stylesheet">
 
     <style>
-        :root {
-            --sat: env(safe-area-inset-top, 0px);
-            --sab: env(safe-area-inset-bottom, 0px);
-            --sal: env(safe-area-inset-left, 0px);
-            --sar: env(safe-area-inset-right, 0px);
-        }
-
         @font-face {
             font-family: 'Roboto';
             src: url('Roboto-Regular.ttf') format('truetype');
@@ -29,26 +22,16 @@
             font-display: swap;
         }
 
-        html {
-            height: 100%;
-            overflow: hidden;
-            overscroll-behavior: none;
-            -webkit-text-size-adjust: 100%;
-        }
-
-        body {
+        html, body {
             margin: 0;
             padding: 0;
-            position: fixed;
-            inset: 0;
-            width: 100%;
+            height: 100%;
             overflow: hidden;
             overscroll-behavior: none;
             -webkit-text-size-adjust: 100%;
             -webkit-user-select: none;
             user-select: none;
             background: #000;
-            font-family: 'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
         }
 
         * {
@@ -66,11 +49,18 @@
         ::selection { background: transparent; color: inherit; }
         ::-moz-selection { background: transparent; color: inherit; }
 
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            font-family: 'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+        }
+
         #phone-viewport {
-            position: fixed;
-            inset: 0;
-            width: 100%;
-            height: 100%;
+            position: relative;
+            width: 100vw;
+            height: 100vh;
             background: #000;
             overflow: hidden;
             -webkit-touch-callout: none;
@@ -90,9 +80,10 @@
             left: 0;
             width: 100%;
             background-color: #000;
-            padding-top: var(--sat);
+            padding-top: env(safe-area-inset-top, 10px);
             z-index: 20;
         }
+        @media (display-mode: standalone) { #ui-wrapper { padding-top: calc(env(safe-area-inset-top, 47px) + 15px); } }
 
         #ui { height: 50px; width: 100%; display: flex; align-items: center; justify-content: space-between; padding: 0 24px; }
 
@@ -107,6 +98,7 @@
             letter-spacing: 0.5px;
             line-height: 1;
             margin-left: -3px;
+            transition: opacity 0.2s;   /* ← добавлено: плавное затухание в игре */
         }
         #alpha-label.active-mode {
             opacity: 1;
@@ -131,6 +123,7 @@
             align-items: center;
             justify-content: center;
             opacity: 0.4;
+            transition: opacity 0.2s;   /* ← добавлено: плавное затухание в игре */
         }
         .nav-btn.active-mode { opacity: 1; }
 
@@ -245,8 +238,8 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            height: calc(85px + var(--sat));
-            padding-top: var(--sat);
+            height: 85px;
+            padding-top: env(safe-area-inset-top, 0px);
             background-color: #000;
             position: relative;
             padding-right: 20px;
@@ -264,6 +257,7 @@
             align-items: center;
             justify-content: center;
             position: relative;
+            /* без transition — мгновенная вспышка в меню */
         }
         .holo-tab:active { background-color: rgba(51, 181, 229, 0.4); }
         .holo-tab::after {
@@ -302,7 +296,6 @@
             background-color: #000;
             padding-top: 25px;
             overflow-y: auto;
-            -webkit-overflow-scrolling: touch;
         }
 
         .list-item {
@@ -311,6 +304,7 @@
             cursor: pointer;
             background-color: #000;
             border: none;
+            /* без transition — мгновенная вспышка в меню */
         }
 
         #start-btn {
@@ -335,7 +329,7 @@
 
         .menu-version {
             margin-top: auto;
-            padding: 22px 24px calc(22px + var(--sab)) 24px;
+            padding: 22px 24px calc(22px + env(safe-area-inset-bottom, 0px)) 24px;
             color: #33b5e5;
             font-family: 'Roboto', monospace;
             font-size: 22px;
@@ -353,7 +347,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            padding: calc(20px + var(--sat)) 20px calc(20px + var(--sab)) 20px;
+            padding: 20px;
             opacity: 0;
             visibility: hidden;
             transition: opacity 0.25s ease, visibility 0.25s ease;
@@ -368,9 +362,8 @@
             border: 2px solid #33B5E5;
             max-width: 440px;
             width: 100%;
-            max-height: 100%;
+            max-height: 90vh;
             overflow-y: auto;
-            -webkit-overflow-scrolling: touch;
             color: #C3C3C3;
             transform: translateY(10px);
             transition: transform 0.25s ease;
@@ -402,7 +395,7 @@
             display: flex;
             flex-direction: column;
             gap: 14px;
-            margin-top: 28px;
+            margin-top: 28px;   /* сдвиг туториала вниз */
             margin-bottom: 6px;
         }
 
@@ -454,7 +447,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            padding: calc(20px + var(--sat)) 20px calc(20px + var(--sab)) 20px;
+            padding: 20px;
             opacity: 0;
             visibility: hidden;
             transition: opacity 0.25s ease, visibility 0.25s ease;
@@ -532,7 +525,7 @@
                     <button id="wave-btn" class="nav-btn">
                         <div class="wave-icon"></div>
                     </button>
-                    <span id="alpha-label">Alpha 1.3.2 (Test)</span>
+                    <span id="alpha-label">Alpha 1.3.2</span>
                 </div>
                 <span id="score">0</span>
             </div>
@@ -553,7 +546,7 @@
             <div class="list-item" id="about-btn">
                 <div class="item-text">How to play</div>
             </div>
-            <div class="menu-version">Alpha 1.3.2 (Test)</div>
+            <div class="menu-version">Alpha 1.3.2</div>
         </div>
     </div>
 
@@ -572,6 +565,7 @@
                         <div class="control-icon">
                             <div class="pause-balloon-icon"></div>
                         </div>
+                        <!-- заменили resume на continue -->
                         <div class="control-text"><b>Balloon</b> - Pause / continue, back to menu</div>
                     </div>
 
@@ -600,41 +594,6 @@
     </div>
 
     <script>
-        (function initSafeArea() {
-            const root = document.documentElement;
-
-            const probe = document.createElement('div');
-            probe.style.cssText =
-                'position:fixed;top:0;left:0;width:0;height:0;visibility:hidden;pointer-events:none;' +
-                'padding-top:env(safe-area-inset-top,0px);' +
-                'padding-bottom:env(safe-area-inset-bottom,0px);' +
-                'padding-left:env(safe-area-inset-left,0px);' +
-                'padding-right:env(safe-area-inset-right,0px);';
-            document.body.appendChild(probe);
-
-            const cs = getComputedStyle(probe);
-            let top    = parseFloat(cs.paddingTop)    || 0;
-            let bottom = parseFloat(cs.paddingBottom) || 0;
-            let left   = parseFloat(cs.paddingLeft)   || 0;
-            let right  = parseFloat(cs.paddingRight)  || 0;
-            probe.remove();
-
-            const isStandalone =
-                window.navigator.standalone === true ||
-                window.matchMedia('(display-mode: standalone)').matches;
-
-            if (isStandalone && top === 0) {
-                const longSide = Math.max(window.screen.width, window.screen.height);
-                if (longSide >= 812) { top = 47; bottom = 34; }
-                else                 { top = 20; bottom = 0;  }
-            }
-
-            root.style.setProperty('--sat', top + 'px');
-            root.style.setProperty('--sab', bottom + 'px');
-            root.style.setProperty('--sal', left + 'px');
-            root.style.setProperty('--sar', right + 'px');
-        })();
-
         document.addEventListener('gesturestart', e => e.preventDefault());
         document.addEventListener('selectstart', e => e.preventDefault());
 
