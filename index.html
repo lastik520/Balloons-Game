@@ -4,8 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Balloons">
+    <meta name="theme-color" content="#000000">
+    <meta name="color-scheme" content="dark">
     <meta name="format-detection" content="telephone=no">
     <title>Balloons-Game</title>
 
@@ -22,16 +25,45 @@
             font-display: swap;
         }
 
-        html, body {
+        /* ===== SAFE AREA VARIABLES ===== */
+        :root {
+            --sat: env(safe-area-inset-top, 0px);
+            --sab: env(safe-area-inset-bottom, 0px);
+            --sal: env(safe-area-inset-left, 0px);
+            --sar: env(safe-area-inset-right, 0px);
+            --ui-h: 50px;
+        }
+
+        /* ===== ЖЁСТКИЙ FULLSCREEN ROOT =====
+           html/body полностью зафиксированы, страница физически
+           не может скроллиться/резиниться -> iOS не считает это
+           "страницей" и не рисует блюр/затемнение сверху. */
+        html {
             margin: 0;
             padding: 0;
+            width: 100%;
             height: 100%;
             overflow: hidden;
+            background: #000;
             overscroll-behavior: none;
             -webkit-text-size-adjust: 100%;
+        }
+
+        body {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            background: #000;
+            overscroll-behavior: none;
+            font-family: 'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
             -webkit-user-select: none;
             user-select: none;
-            background: #000;
+            -webkit-touch-callout: none;
         }
 
         * {
@@ -43,30 +75,25 @@
             -webkit-touch-callout: none;
             -webkit-user-drag: none;
             -webkit-tap-highlight-color: transparent;
-            touch-action: none;
         }
 
         ::selection { background: transparent; color: inherit; }
         ::-moz-selection { background: transparent; color: inherit; }
 
-        body {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            font-family: 'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
-        }
-
+        /* ===== GAME VIEWPORT ===== */
         #phone-viewport {
-            position: relative;
-            width: 100vw;
-            height: 100vh;
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
             background: #000;
             overflow: hidden;
-            -webkit-touch-callout: none;
-            -webkit-tap-highlight-color: transparent;
             opacity: 0;
             transition: opacity 0.3s ease;
+            touch-action: none;
+            -webkit-touch-callout: none;
+            -webkit-tap-highlight-color: transparent;
         }
 
         #phone-viewport.active {
@@ -74,18 +101,27 @@
             background: radial-gradient(circle at center, #07084f 0%, #02031c 100%);
         }
 
+        /* ===== UI BAR (сплошная чёрная плашка поверх safe-area) ===== */
         #ui-wrapper {
             position: absolute;
             top: 0;
             left: 0;
-            width: 100%;
+            right: 0;
             background-color: #000;
-            padding-top: env(safe-area-inset-top, 10px);
+            padding-top: var(--sat);
+            padding-left: var(--sal);
+            padding-right: var(--sar);
             z-index: 20;
         }
-        @media (display-mode: standalone) { #ui-wrapper { padding-top: calc(env(safe-area-inset-top, 47px) + 15px); } }
 
-        #ui { height: 50px; width: 100%; display: flex; align-items: center; justify-content: space-between; padding: 0 24px; }
+        #ui {
+            height: var(--ui-h);
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 24px;
+        }
 
         #controls { display: flex; align-items: center; gap: 15px; margin-left: -10px; }
 
@@ -99,9 +135,7 @@
             line-height: 1;
             margin-left: -3px;
         }
-        #alpha-label.active-mode {
-            opacity: 1;
-        }
+        #alpha-label.active-mode { opacity: 1; }
 
         #score {
             color: #33b5e5;
@@ -159,22 +193,14 @@
             background-color: #33b5e5;
             clip-path: polygon(0 0, 100% 50%, 0 100%);
         }
-        .wave-icon::after {
-            margin-left: -1px;
-        }
+        .wave-icon::after { margin-left: -1px; }
 
-        .home-icon {
-            width: 18px;
-            height: 18px;
-            position: relative;
-        }
+        .home-icon { width: 18px; height: 18px; position: relative; }
         .home-icon::before {
             content: "";
             position: absolute;
-            top: 0;
-            left: 0;
-            width: 0;
-            height: 0;
+            top: 0; left: 0;
+            width: 0; height: 0;
             border-left: 9px solid transparent;
             border-right: 9px solid transparent;
             border-bottom: 9px solid #33b5e5;
@@ -182,17 +208,38 @@
         .home-icon::after {
             content: "";
             position: absolute;
-            bottom: 0;
-            left: 0;
-            width: 18px;
-            height: 9px;
+            bottom: 0; left: 0;
+            width: 18px; height: 9px;
             background-color: #33b5e5;
         }
 
-        .balloon-container { position: absolute; width: 85px; height: 180px; cursor: pointer; animation: floatUp linear forwards; will-change: transform; z-index: 5; }
+        /* ===== BALLOONS ===== */
+        .balloon-container {
+            position: absolute;
+            width: 85px;
+            height: 180px;
+            cursor: pointer;
+            animation: floatUp linear forwards;
+            will-change: transform;
+            z-index: 5;
+        }
         .paused { animation-play-state: paused !important; }
-        .balloon { position: absolute; top: 0; left: 0; width: 85px; height: 85px; border-radius: 50%; box-shadow: inset -8px -8px 15px rgba(0,0,0,0.3), inset 8px 8px 15px rgba(255,255,255,0.4); }
-        .balloon::before { content: ""; position: absolute; top: 12px; left: 12px; width: 20px; height: 12px; background: rgba(255, 255, 255, 0.5); border-radius: 50%; transform: rotate(-30deg); }
+        .balloon {
+            position: absolute;
+            top: 0; left: 0;
+            width: 85px; height: 85px;
+            border-radius: 50%;
+            box-shadow: inset -8px -8px 15px rgba(0,0,0,0.3), inset 8px 8px 15px rgba(255,255,255,0.4);
+        }
+        .balloon::before {
+            content: "";
+            position: absolute;
+            top: 12px; left: 12px;
+            width: 20px; height: 12px;
+            background: rgba(255,255,255,0.5);
+            border-radius: 50%;
+            transform: rotate(-30deg);
+        }
         .balloon::after {
             content: "";
             position: absolute;
@@ -203,14 +250,28 @@
             border-right: 6px solid transparent;
             border-bottom: 10px solid currentColor;
         }
-        @keyframes floatUp { 0% { transform: translateY(102vh); } 100% { transform: translateY(-200px); } }
+        @keyframes floatUp {
+            0%   { transform: translateY(102vh); }
+            100% { transform: translateY(-200px); }
+        }
 
-        .particle { position: absolute; width: 8px; height: 8px; border-radius: 50%; pointer-events: none; animation: explode 0.4s ease-out forwards; z-index: 6; }
-        @keyframes explode { 0% { transform: translate(0, 0) scale(1); opacity: 1; } 100% { transform: translate(var(--dx), var(--dy)) scale(0); opacity: 0; } }
+        .particle {
+            position: absolute;
+            width: 8px; height: 8px;
+            border-radius: 50%;
+            pointer-events: none;
+            animation: explode 0.4s ease-out forwards;
+            z-index: 6;
+        }
+        @keyframes explode {
+            0%   { transform: translate(0, 0) scale(1); opacity: 1; }
+            100% { transform: translate(var(--dx), var(--dy)) scale(0); opacity: 0; }
+        }
 
+        /* ===== GAME MENU ===== */
         #game-menu {
             position: fixed;
-            inset: 0;
+            top: 0; left: 0; right: 0; bottom: 0;
             background-color: #000;
             z-index: 9999;
             display: flex;
@@ -219,6 +280,10 @@
             opacity: 1;
             visibility: visible;
             animation: menuFadeIn 0.4s ease-out;
+            padding-left: var(--sal);
+            padding-right: var(--sar);
+            padding-bottom: var(--sab);
+            overscroll-behavior: none;
         }
 
         @keyframes menuFadeIn {
@@ -236,11 +301,12 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            height: 85px;
-            padding-top: env(safe-area-inset-top, 0px);
+            /* ВАЖНО: контент шапки всегда 85px + отдельно сверху safe-area */
+            min-height: calc(85px + var(--sat));
+            padding-top: var(--sat);
+            padding-right: 20px;
             background-color: #000;
             position: relative;
-            padding-right: 20px;
             flex-shrink: 0;
         }
 
@@ -260,8 +326,7 @@
         .holo-tab::after {
             content: '';
             position: absolute;
-            bottom: 0;
-            left: 0;
+            bottom: 0; left: 0;
             width: 100%;
             height: 9px;
             background-color: #33B5E5;
@@ -279,8 +344,7 @@
 
         .holo-underline {
             position: absolute;
-            bottom: 0;
-            left: 0;
+            bottom: 0; left: 0;
             width: 100%;
             height: 2px;
             background-color: #33B5E5;
@@ -293,6 +357,9 @@
             background-color: #000;
             padding-top: 25px;
             overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+            touch-action: pan-y;
+            overscroll-behavior: contain;
         }
 
         .list-item {
@@ -309,9 +376,7 @@
             border-bottom: 2px solid #2a2a2a;
         }
 
-        #about-btn {
-            border-bottom: 2px solid #2a2a2a;
-        }
+        #about-btn { border-bottom: 2px solid #2a2a2a; }
 
         .list-item:active { background-color: rgba(51, 181, 229, 0.4); }
 
@@ -325,30 +390,33 @@
 
         .menu-version {
             margin-top: auto;
-            padding: 22px 24px calc(22px + env(safe-area-inset-bottom, 0px)) 24px;
+            padding: 22px 24px;
             color: #33b5e5;
             font-family: 'Roboto', monospace;
             font-size: 22px;
             font-weight: 400;
             letter-spacing: 1px;
-            opacity: 1;
             text-align: right;
         }
 
-        #about-overlay {
+        /* ===== OVERLAYS (About / Pause) ===== */
+        #about-overlay,
+        #pause-overlay {
             position: fixed;
-            inset: 0;
+            top: 0; left: 0; right: 0; bottom: 0;
             background: rgba(0, 0, 0, 0.5);
             z-index: 10000;
             display: flex;
             align-items: center;
             justify-content: center;
-            padding: 20px;
+            padding: calc(20px + var(--sat)) calc(20px + var(--sar)) calc(20px + var(--sab)) calc(20px + var(--sal));
             opacity: 0;
             visibility: hidden;
             transition: opacity 0.25s ease, visibility 0.25s ease;
+            overscroll-behavior: contain;
         }
-        #about-overlay.visible {
+        #about-overlay.visible,
+        #pause-overlay.visible {
             opacity: 1;
             visibility: visible;
         }
@@ -358,8 +426,10 @@
             border: 2px solid #33B5E5;
             max-width: 440px;
             width: 100%;
-            max-height: 90vh;
+            max-height: 100%;
             overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+            touch-action: pan-y;
             color: #C3C3C3;
             transform: translateY(10px);
             transition: transform 0.25s ease;
@@ -376,9 +446,7 @@
             border-bottom: 2px solid #33B5E5;
         }
 
-        .about-body {
-            padding: 22px 24px;
-        }
+        .about-body { padding: 22px 24px; }
 
         .about-body p {
             font-size: 15px;
@@ -391,34 +459,22 @@
             display: flex;
             flex-direction: column;
             gap: 14px;
-            margin-top: 28px;   /* сдвиг туториала вниз */
+            margin-top: 28px;
             margin-bottom: 6px;
         }
 
-        .control-row {
-            display: flex;
-            align-items: center;
-            gap: 14px;
-        }
+        .control-row { display: flex; align-items: center; gap: 14px; }
 
         .control-icon {
-            width: 34px;
-            height: 34px;
+            width: 34px; height: 34px;
             display: flex;
             align-items: center;
             justify-content: center;
             flex-shrink: 0;
         }
 
-        .control-text {
-            font-size: 14px;
-            line-height: 1.4;
-            color: #C3C3C3;
-        }
-        .control-text b {
-            color: #fff;
-            font-weight: 400;
-        }
+        .control-text { font-size: 14px; line-height: 1.4; color: #C3C3C3; }
+        .control-text b { color: #fff; font-weight: 400; }
 
         .about-close {
             display: block;
@@ -434,24 +490,6 @@
             letter-spacing: 0.5px;
         }
         .about-close:active { opacity: 0.7; }
-
-        #pause-overlay {
-            position: fixed;
-            inset: 0;
-            background: rgba(0, 0, 0, 0.5);
-            z-index: 10000;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-            opacity: 0;
-            visibility: hidden;
-            transition: opacity 0.25s ease, visibility 0.25s ease;
-        }
-        #pause-overlay.visible {
-            opacity: 1;
-            visibility: visible;
-        }
 
         #pause-box {
             background: #0a0a0a;
@@ -473,9 +511,7 @@
             border-bottom: 2px solid #33B5E5;
         }
 
-        .pause-body {
-            padding: 28px 24px;
-        }
+        .pause-body { padding: 28px 24px; }
 
         .pause-score {
             color: #C3C3C3;
@@ -485,9 +521,7 @@
             letter-spacing: 1px;
             font-variant-numeric: tabular-nums;
         }
-        .pause-score span {
-            color: #33B5E5;
-        }
+        .pause-score span { color: #33B5E5; }
 
         .pause-btn-item {
             display: block;
@@ -503,9 +537,7 @@
             letter-spacing: 0.5px;
             font-family: inherit;
         }
-        .pause-btn-item:last-of-type {
-            margin-bottom: 24px;
-        }
+        .pause-btn-item:last-of-type { margin-bottom: 24px; }
         .pause-btn-item:active { opacity: 0.7; }
     </style>
 </head>
@@ -521,7 +553,7 @@
                     <button id="wave-btn" class="nav-btn">
                         <div class="wave-icon"></div>
                     </button>
-                    <span id="alpha-label">Alpha 1.3.1</span>
+                    <span id="alpha-label">Alpha 1.3.2</span>
                 </div>
                 <span id="score">0</span>
             </div>
@@ -542,7 +574,7 @@
             <div class="list-item" id="about-btn">
                 <div class="item-text">How to play</div>
             </div>
-            <div class="menu-version">Alpha 1.3.1</div>
+            <div class="menu-version">Alpha 1.3.2</div>
         </div>
     </div>
 
@@ -561,7 +593,6 @@
                         <div class="control-icon">
                             <div class="pause-balloon-icon"></div>
                         </div>
-                        <!-- заменили resume на continue -->
                         <div class="control-text"><b>Balloon</b> - Pause / continue, back to menu</div>
                     </div>
 
