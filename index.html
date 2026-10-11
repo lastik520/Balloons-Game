@@ -25,7 +25,7 @@
             font-display: swap;
         }
 
-        /* ===== SAFE AREA VARIABLES ===== */
+        /* ===== SAFE AREA ===== */
         :root {
             --sat: env(safe-area-inset-top, 0px);
             --sab: env(safe-area-inset-bottom, 0px);
@@ -34,10 +34,7 @@
             --ui-h: 50px;
         }
 
-        /* ===== ЖЁСТКИЙ FULLSCREEN ROOT =====
-           html/body полностью зафиксированы, страница физически
-           не может скроллиться/резиниться -> iOS не считает это
-           "страницей" и не рисует блюр/затемнение сверху. */
+        /* ===== FULLSCREEN ROOT ===== */
         html {
             margin: 0;
             padding: 0;
@@ -101,7 +98,9 @@
             background: radial-gradient(circle at center, #07084f 0%, #02031c 100%);
         }
 
-        /* ===== UI BAR (сплошная чёрная плашка поверх safe-area) ===== */
+        /* ===== UI BAR в игре =====
+           Чёрная плашка лежит под статус-баром и тянется вниз
+           на safe-area. Иконки и счёт — ровно в 50px-строке ПОД safe-area. */
         #ui-wrapper {
             position: absolute;
             top: 0;
@@ -213,7 +212,7 @@
             background-color: #33b5e5;
         }
 
-        /* ===== BALLOONS ===== */
+        /* ===== BALLOONS (НЕ ТРОГАЛ) ===== */
         .balloon-container {
             position: absolute;
             width: 85px;
@@ -268,7 +267,9 @@
             100% { transform: translate(var(--dx), var(--dy)) scale(0); opacity: 0; }
         }
 
-        /* ===== GAME MENU ===== */
+        /* ===== GAME MENU =====
+           НИКАКИХ padding-left/right/bottom — иначе складывалось с safe-area
+           внутри .menu-version и версия уползала вверх. */
         #game-menu {
             position: fixed;
             top: 0; left: 0; right: 0; bottom: 0;
@@ -280,9 +281,6 @@
             opacity: 1;
             visibility: visible;
             animation: menuFadeIn 0.4s ease-out;
-            padding-left: var(--sal);
-            padding-right: var(--sar);
-            padding-bottom: var(--sab);
             overscroll-behavior: none;
         }
 
@@ -301,10 +299,11 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            /* ВАЖНО: контент шапки всегда 85px + отдельно сверху safe-area */
+            /* 85px — сам контент, safe-area добавляется СВЕРХУ */
             min-height: calc(85px + var(--sat));
             padding-top: var(--sat);
             padding-right: 20px;
+            padding-left: var(--sal);
             background-color: #000;
             position: relative;
             flex-shrink: 0;
@@ -356,6 +355,8 @@
             flex-direction: column;
             background-color: #000;
             padding-top: 25px;
+            padding-left: var(--sal);
+            padding-right: var(--sar);
             overflow-y: auto;
             -webkit-overflow-scrolling: touch;
             touch-action: pan-y;
@@ -388,14 +389,17 @@
         }
         .list-item:active .item-text { color: #fff; }
 
+        /* ВЕРСИЯ — прижата к САМОМУ НИЗУ через margin-top: auto.
+           Safe-area bottom добавляется ОДИН раз, здесь. */
         .menu-version {
             margin-top: auto;
-            padding: 22px 24px;
+            padding: 22px 24px calc(22px + var(--sab)) 24px;
             color: #33b5e5;
             font-family: 'Roboto', monospace;
             font-size: 22px;
             font-weight: 400;
             letter-spacing: 1px;
+            opacity: 1;
             text-align: right;
         }
 
@@ -635,6 +639,50 @@
         document.addEventListener('dblclick', e => e.preventDefault(), { passive: false });
         document.addEventListener('contextmenu', e => e.preventDefault());
 
+        /* Блокируем вертикальный bounce iOS ВО ВРЕМЯ ИГРЫ.
+           Скролл разрешён только внутри .menu-content и #about-box. */
+        document.addEventListener('touchmove', (e) => {
+            const scrollable = e.target.closest('.menu-content, #about-box');
+            if (!scrollable) {
+                if (e.cancelable) e.preventDefault();
+            }
+        }, { passive: false });
+
+        /* ===== iOS PWA FIX =====
+           На первом кадре после cold start из домашнего экрана
+           env(safe-area-inset-*) иногда возвращает 0. Форсим reflow
+           несколько раз, чтобы браузер пересчитал значения. */
+        function resyncSafeArea() {
+            const root = document.documentElement;
+            const probe = document.createElement('div');
+            probe.style.cssText = 'position:fixed;top:0;left:0;width:0;height:0;pointer-events:none;visibility:hidden;';
+            document.body.appendChild(probe);
+
+            probe.style.height = 'env(safe-area-inset-top, 0px)';
+            void probe.offsetHeight;
+            probe.style.height = 'env(safe-area-inset-bottom, 0px)';
+            void probe.offsetHeight;
+
+            probe.remove();
+
+            // Триггерим перерисовку UI
+            document.body.style.transform = 'translateZ(0)';
+            requestAnimationFrame(() => {
+                document.body.style.transform = '';
+            });
+        }
+
+        window.addEventListener('load', () => {
+            resyncSafeArea();
+            setTimeout(resyncSafeArea, 100);
+            setTimeout(resyncSafeArea, 500);
+        });
+
+        window.addEventListener('orientationchange', () => {
+            setTimeout(resyncSafeArea, 300);
+        });
+
+        /* ===== GAME ===== */
         const viewport = document.getElementById('phone-viewport');
         const scoreEl = document.getElementById('score');
         const pauseBtn = document.getElementById('pause-btn');
