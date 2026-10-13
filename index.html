@@ -70,7 +70,6 @@
             justify-content: center;
             align-items: center;
             min-height: 100vh;
-            min-height: 100dvh;
             font-family: 'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
         }
 
@@ -78,7 +77,6 @@
             position: relative;
             width: 100vw;
             height: 100vh;
-            height: 100dvh;
             background: #000;
             overflow: hidden;
             -webkit-touch-callout: none;
@@ -98,23 +96,12 @@
             left: 0;
             width: 100%;
             background-color: #000;
-            padding-top: env(safe-area-inset-top, 12px);
+            padding-top: env(safe-area-inset-top, 10px);
             z-index: 20;
         }
-        @media (display-mode: standalone) {
-            #ui-wrapper {
-                padding-top: calc(env(safe-area-inset-top, 50px) + 18px);
-            }
-        }
+        @media (display-mode: standalone) { #ui-wrapper { padding-top: calc(env(safe-area-inset-top, 47px) + 15px); } }
 
-        #ui {
-            height: 50px;
-            width: 100%;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 0 24px;
-        }
+        #ui { height: 50px; width: 100%; display: flex; align-items: center; justify-content: space-between; padding: 0 24px; }
 
         #controls { display: flex; align-items: center; gap: 15px; margin-left: -10px; }
 
@@ -129,7 +116,9 @@
             margin-left: -3px;
             transition: opacity 0.2s ease, color 0.2s ease;
         }
-        #alpha-label.active-mode { opacity: 1; }
+        #alpha-label.active-mode {
+            opacity: 1;
+        }
 
         #score {
             color: var(--accent);
@@ -176,25 +165,32 @@
         }
 
         .wave-icon {
-            width: 16px;
-            height: 16px;
+            width: 15px;
+            height: 19px;
             display: flex;
             align-items: center;
             justify-content: center;
             gap: 0;
+            transform: translateY(1.5px);
         }
         .wave-icon::before,
         .wave-icon::after {
             content: "";
             width: 8px;
-            height: 16px;
+            height: 19px;
             background-color: var(--accent);
             clip-path: polygon(0 0, 100% 50%, 0 100%);
             transition: background-color 0.2s ease;
         }
-        .wave-icon::after { margin-left: -1px; }
+        .wave-icon::after {
+            margin-left: -1px;
+        }
 
-        .home-icon { width: 18px; height: 18px; position: relative; }
+        .home-icon {
+            width: 18px;
+            height: 18px;
+            position: relative;
+        }
         .home-icon::before {
             content: "";
             position: absolute;
@@ -218,36 +214,10 @@
             transition: background-color 0.2s ease;
         }
 
-        .balloon-container {
-            position: absolute;
-            width: 85px;
-            height: 180px;
-            cursor: pointer;
-            animation: floatUp linear forwards;
-            will-change: transform;
-            z-index: 5;
-        }
+        .balloon-container { position: absolute; width: 85px; height: 180px; cursor: pointer; animation: floatUp linear forwards; will-change: transform; z-index: 5; }
         .paused { animation-play-state: paused !important; }
-        .balloon {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 85px;
-            height: 85px;
-            border-radius: 50%;
-            box-shadow: inset -8px -8px 15px rgba(0,0,0,0.3), inset 8px 8px 15px rgba(255,255,255,0.4);
-        }
-        .balloon::before {
-            content: "";
-            position: absolute;
-            top: 12px;
-            left: 12px;
-            width: 20px;
-            height: 12px;
-            background: rgba(255, 255, 255, 0.5);
-            border-radius: 50%;
-            transform: rotate(-30deg);
-        }
+        .balloon { position: absolute; top: 0; left: 0; width: 85px; height: 85px; border-radius: 50%; box-shadow: inset -8px -8px 15px rgba(0,0,0,0.3), inset 8px 8px 15px rgba(255,255,255,0.4); }
+        .balloon::before { content: ""; position: absolute; top: 12px; left: 12px; width: 20px; height: 12px; background: rgba(255, 255, 255, 0.5); border-radius: 50%; transform: rotate(-30deg); }
         .balloon::after {
             content: "";
             position: absolute;
@@ -258,24 +228,10 @@
             border-right: 6px solid transparent;
             border-bottom: 10px solid currentColor;
         }
-        @keyframes floatUp {
-            0% { transform: translateY(102vh); }
-            100% { transform: translateY(-200px); }
-        }
+        @keyframes floatUp { 0% { transform: translateY(102vh); } 100% { transform: translateY(-200px); } }
 
-        .particle {
-            position: absolute;
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            pointer-events: none;
-            animation: explode 0.4s ease-out forwards;
-            z-index: 6;
-        }
-        @keyframes explode {
-            0% { transform: translate(0, 0) scale(1); opacity: 1; }
-            100% { transform: translate(var(--dx), var(--dy)) scale(0); opacity: 0; }
-        }
+        .particle { position: absolute; width: 8px; height: 8px; border-radius: 50%; pointer-events: none; animation: explode 0.4s ease-out forwards; z-index: 6; }
+        @keyframes explode { 0% { transform: translate(0, 0) scale(1); opacity: 1; } 100% { transform: translate(var(--dx), var(--dy)) scale(0); opacity: 0; } }
 
         #game-menu {
             position: fixed;
@@ -305,16 +261,11 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            min-height: 85px;
-            padding-top: env(safe-area-inset-top, 12px);
+            height: 85px;
+            padding-top: env(safe-area-inset-top, 0px);
             background-color: #000;
             position: relative;
             flex-shrink: 0;
-        }
-        @media (display-mode: standalone) {
-            .holo-header {
-                padding-top: calc(env(safe-area-inset-top, 50px) + 18px);
-            }
         }
 
         .holo-tab {
@@ -367,7 +318,6 @@
             border-radius: 50%;
             position: relative;
             pointer-events: none;
-            transform: translateY(-2px);
         }
         .menu-balloon-icon::after {
             content: "";
@@ -379,8 +329,12 @@
             border-right: 4px solid transparent;
             border-bottom: 6px solid #C3C3C3;
         }
-        .menu-balloon-wrap:active .menu-balloon-icon { background-color: #fff; }
-        .menu-balloon-wrap:active .menu-balloon-icon::after { border-bottom-color: #fff; }
+        .menu-balloon-wrap:active .menu-balloon-icon {
+            background-color: #fff;
+        }
+        .menu-balloon-wrap:active .menu-balloon-icon::after {
+            border-bottom-color: #fff;
+        }
 
         .holo-underline {
             position: absolute;
@@ -398,13 +352,12 @@
             flex-direction: column;
             background-color: #000;
             padding-top: 25px;
-            padding-bottom: calc(env(safe-area-inset-bottom, 0px));
             overflow-y: auto;
         }
 
         .list-item {
             width: 100%;
-            padding: 22px 24px;
+            padding: 22px 18px;
             cursor: pointer;
             background-color: #000;
             border: none;
@@ -417,9 +370,26 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
+            padding-left: 24px;
+            padding-right: 24px;
         }
-        #about-btn { border-bottom: 2px solid #2a2a2a; }
-        #whatsnew-btn { border-bottom: 2px solid #2a2a2a; }
+
+        #about-btn {
+            border-bottom: 2px solid #2a2a2a;
+        }
+
+        #about-btn .item-text {
+            margin-left: 6px;
+        }
+
+        #whatsnew-btn {
+            border-bottom: 2px solid #2a2a2a;
+        }
+
+        #whatsnew-btn .item-text {
+            margin-left: 7px;
+        }
+
         .list-item:active { background-color: var(--accent-bg); }
 
         .item-text {
@@ -452,29 +422,13 @@
         }
 
         .menu-version {
-            display: inline-flex;
-            align-items: center;
-            gap: 10px;
             color: var(--accent);
             font-family: 'Roboto', monospace;
             font-size: 22px;
             font-weight: 400;
             letter-spacing: 1px;
+            text-align: right;
             transition: color 0.2s ease;
-        }
-        .menu-version::before {
-            content: "";
-            display: inline-block;
-            width: 10px;
-            height: 10px;
-            background-color: var(--accent);
-            transform: rotate(45deg);
-            animation: devPulse 2s ease-in-out infinite;
-            transition: background-color 0.2s ease;
-        }
-        @keyframes devPulse {
-            0%, 100% { opacity: 1; }
-            50%      { opacity: 0.35; }
         }
 
         #about-overlay,
@@ -488,8 +442,6 @@
             align-items: center;
             justify-content: center;
             padding: 20px;
-            padding-top: calc(20px + env(safe-area-inset-top, 0px));
-            padding-bottom: calc(20px + env(safe-area-inset-bottom, 0px));
             opacity: 0;
             visibility: hidden;
             transition: opacity 0.25s ease, visibility 0.25s ease;
@@ -509,7 +461,6 @@
             max-width: 440px;
             width: 100%;
             max-height: 90vh;
-            max-height: 90dvh;
             overflow-y: auto;
             color: #C3C3C3;
             transform: translateY(10px);
@@ -532,7 +483,9 @@
             transition: color 0.2s ease, border-bottom-color 0.2s ease;
         }
 
-        .about-body { padding: 22px 24px; }
+        .about-body {
+            padding: 22px 24px;
+        }
 
         .about-body p {
             font-size: 15px;
@@ -555,7 +508,10 @@
             color: var(--accent);
             transition: color 0.2s ease;
         }
-        .news-footer-note b { color: var(--accent); font-weight: 400; }
+        .news-footer-note b {
+            color: var(--accent);
+            font-weight: 400;
+        }
 
         .controls-list {
             display: flex;
@@ -565,7 +521,11 @@
             margin-bottom: 6px;
         }
 
-        .control-row { display: flex; align-items: center; gap: 14px; }
+        .control-row {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
 
         .control-icon {
             width: 34px;
@@ -581,7 +541,10 @@
             line-height: 1.4;
             color: #C3C3C3;
         }
-        .control-text b { color: #fff; font-weight: 400; }
+        .control-text b {
+            color: #fff;
+            font-weight: 400;
+        }
 
         .news-list {
             list-style: none;
@@ -606,7 +569,10 @@
             transition: color 0.2s ease;
         }
         .news-list li:last-child { margin-bottom: 0; }
-        .news-list li b { color: #fff; font-weight: 400; }
+        .news-list li b {
+            color: #fff;
+            font-weight: 400;
+        }
 
         .about-close {
             display: block;
@@ -669,13 +635,14 @@
             align-items: center;
             justify-content: center;
             padding: 20px;
-            padding-top: calc(20px + env(safe-area-inset-top, 0px));
-            padding-bottom: calc(20px + env(safe-area-inset-bottom, 0px));
             opacity: 0;
             visibility: hidden;
             transition: opacity 0.25s ease, visibility 0.25s ease;
         }
-        #pause-overlay.visible { opacity: 1; visibility: visible; }
+        #pause-overlay.visible {
+            opacity: 1;
+            visibility: visible;
+        }
 
         #pause-box {
             background: #0a0a0a;
@@ -698,13 +665,15 @@
             transition: color 0.2s ease, border-bottom-color 0.2s ease;
         }
 
-        .pause-body { padding: 28px 24px; }
+        .pause-body {
+            padding: 28px 24px;
+        }
 
         .pause-scores-row {
             display: flex;
-            justify-content: space-between;
-            align-items: baseline;
-            gap: 16px;
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 8px;
         }
 
         .pause-score {
@@ -736,8 +705,15 @@
             font-family: inherit;
             transition: background-color 0.2s ease, opacity 0.2s ease;
         }
-        .pause-btn-item:last-of-type { margin-bottom: 24px; }
+        .pause-btn-item:last-of-type {
+            margin-bottom: 24px;
+        }
         .pause-btn-item:active { opacity: 0.7; }
+        .pause-btn-item:disabled {
+            opacity: 0.35;
+            cursor: default;
+        }
+        .pause-btn-item:disabled:active { opacity: 0.35; }
     </style>
 </head>
 <body>
@@ -752,7 +728,7 @@
                     <button id="wave-btn" class="nav-btn">
                         <div class="wave-icon"></div>
                     </button>
-                    <span id="alpha-label">Alpha 1.4.0-dev.2</span>
+                    <span id="alpha-label">Alpha 1.4.0-rc.1</span>
                 </div>
                 <span id="score">0</span>
             </div>
@@ -781,7 +757,7 @@
             </div>
 
             <div class="menu-footer">
-                <div class="menu-version">Alpha 1.4.0-dev.2</div>
+                <div class="menu-version">Alpha 1.4.0-rc.1</div>
             </div>
         </div>
     </div>
@@ -825,6 +801,7 @@
                 <ul class="news-list">
                     <li><b>Best score</b> is now saved on your device.</li>
                     <li><b>Auto-save</b> of your best result when you pause or leave the game.</li>
+                    <li><b>Save game</b> - save score and mode in the pause menu. Load it later from a fresh game.</li>
                     <li><b>Secret</b> - there is a hidden secret in the game. Find it.</li>
                 </ul>
             </div>
@@ -861,6 +838,7 @@
                 </div>
             </div>
             <button class="pause-btn-item" id="pause-continue">Continue</button>
+            <button class="pause-btn-item" id="pause-save-load">Save game</button>
             <button class="pause-btn-item" id="pause-to-menu">Back to menu</button>
         </div>
     </div>
@@ -868,6 +846,7 @@
     <script>
         const THEME_KEY = 'balloons.theme';
         const BEST_KEY  = 'balloons.best.v1';
+        const SAVE_KEY  = 'balloons.save.v1';
 
         function loadTheme() {
             try {
@@ -889,6 +868,40 @@
 
         function saveBest() {
             try { localStorage.setItem(BEST_KEY, String(best)); } catch (e) {}
+        }
+
+        /* Слот сохранения: { score: number, wave: boolean } в JSON.
+           Поддерживаем и старый формат (просто число). */
+        function loadSavedGame() {
+            try {
+                const raw = localStorage.getItem(SAVE_KEY);
+                if (raw === null) return null;
+                try {
+                    const obj = JSON.parse(raw);
+                    if (obj && typeof obj === 'object' && typeof obj.score === 'number') {
+                        return {
+                            score: obj.score,
+                            wave: !!obj.wave
+                        };
+                    }
+                } catch (e) {}
+                const n = parseInt(raw, 10);
+                if (!isNaN(n)) return { score: n, wave: false };
+                return null;
+            } catch (e) { return null; }
+        }
+
+        function saveGameToSlot(scoreVal, waveVal) {
+            try {
+                localStorage.setItem(SAVE_KEY, JSON.stringify({
+                    score: scoreVal,
+                    wave: !!waveVal
+                }));
+            } catch (e) {}
+        }
+
+        function clearSaveSlot() {
+            try { localStorage.removeItem(SAVE_KEY); } catch (e) {}
         }
 
         function applyTheme(theme) {
@@ -926,6 +939,7 @@
         const pauseScoreValue = document.getElementById('pause-score-value');
         const pauseBestValue = document.getElementById('pause-best-value');
         const pauseContinue = document.getElementById('pause-continue');
+        const pauseSaveLoad = document.getElementById('pause-save-load');
         const pauseToMenu = document.getElementById('pause-to-menu');
 
         const gameMenu = document.getElementById('game-menu');
@@ -947,6 +961,7 @@
 
         let score = 0;
         let best = loadBest();
+        let savedGame = loadSavedGame();
         let isPaused = false;
         let isWaveMode = false;
         let modeChangedOnPause = false;
@@ -963,6 +978,23 @@
             pauseBestValue.textContent = best;
         }
         refreshBestUI();
+
+        /* Логика кнопки Save/Load:
+           - слот пуст  -> "Save game", доступна только если score >= 1
+           - слот занят -> "Load game", доступна только если score === 0  */
+        function refreshSaveLoadUI() {
+            let label, enabled;
+            if (savedGame === null) {
+                label = 'Save game';
+                enabled = (score >= 1);
+            } else {
+                label = 'Load game';
+                enabled = (score === 0);
+            }
+            pauseSaveLoad.textContent = label;
+            pauseSaveLoad.disabled = !enabled;
+        }
+        refreshSaveLoadUI();
 
         function clearAllSpawns() {
             clearTimeout(spawnTimeout);
@@ -989,6 +1021,57 @@
             alphaLabel.classList.remove('active-mode');
             pauseOverlay.classList.remove('visible');
             refreshBestUI();
+            refreshSaveLoadUI();
+        }
+
+        function applyWaveModeUI(on) {
+            if (on) {
+                waveBtn.classList.add('active-mode');
+                alphaLabel.classList.add('active-mode');
+            } else {
+                waveBtn.classList.remove('active-mode');
+                alphaLabel.classList.remove('active-mode');
+            }
+        }
+
+        function startGameWithScore(startScore, startWave) {
+            resetGame();
+            score = startScore;
+            scoreEl.textContent = score;
+            isWaveMode = !!startWave;
+            applyWaveModeUI(isWaveMode);
+
+            if (score > best) {
+                best = score;
+                saveBest();
+                refreshBestUI();
+            }
+
+            gameMenu.classList.add('hidden');
+            viewport.classList.add('active');
+            gameStarted = true;
+            refreshSaveLoadUI();
+            setTimeout(() => { gameLoop(); }, 300);
+        }
+
+        function handleSaveLoad() {
+            if (pauseSaveLoad.disabled) return;
+
+            if (savedGame === null) {
+                /* SAVE: только если score >= 1 */
+                if (score < 1) return;
+                savedGame = { score: score, wave: isWaveMode };
+                saveGameToSlot(score, isWaveMode);
+                refreshSaveLoadUI();
+            } else {
+                /* LOAD: только если score === 0 */
+                if (score !== 0) return;
+                const g = savedGame;
+                savedGame = null;
+                clearSaveSlot();
+                refreshSaveLoadUI();
+                startGameWithScore(g.score, g.wave);
+            }
         }
 
         function createBalloon() {
@@ -1093,13 +1176,10 @@
             score = 0;
             scoreEl.textContent = score;
 
-            if (isWaveMode) {
-                waveBtn.classList.add('active-mode');
-                alphaLabel.classList.add('active-mode');
-            } else {
-                waveBtn.classList.remove('active-mode');
-                alphaLabel.classList.remove('active-mode');
-            }
+            applyWaveModeUI(isWaveMode);
+
+            /* Обновляем доступность кнопки Save/Load */
+            refreshSaveLoadUI();
 
             if (isPaused) {
                 modeChangedOnPause = true;
@@ -1120,6 +1200,7 @@
             document.querySelectorAll('.balloon-container').forEach(b => b.classList.add('paused'));
             pauseOverlay.classList.add('visible');
             saveBest();
+            refreshSaveLoadUI();
         }
 
         function closePause() {
@@ -1157,6 +1238,11 @@
 
         pauseContinue.addEventListener('click', closePause);
 
+        pauseSaveLoad.addEventListener('click', (e) => {
+            e.stopPropagation();
+            handleSaveLoad();
+        });
+
         pauseToMenu.addEventListener('click', () => {
             saveBest();
             pauseOverlay.classList.remove('visible');
@@ -1166,12 +1252,7 @@
         });
 
         startButton.addEventListener('click', () => {
-            gameMenu.classList.add('hidden');
-            viewport.classList.add('active');
-            gameStarted = true;
-            setTimeout(() => {
-                gameLoop();
-            }, 300);
+            startGameWithScore(0, false);
         });
 
         gameTab.addEventListener('click', () => {
@@ -1236,6 +1317,14 @@
 
         creditsClose.addEventListener('click', () => {
             creditsOverlay.classList.remove('visible');
+        });
+
+        aboutOverlay.addEventListener('click', (e) => {
+            if (e.target === aboutOverlay) aboutOverlay.classList.remove('visible');
+        });
+
+        newsOverlay.addEventListener('click', (e) => {
+            if (e.target === newsOverlay) newsOverlay.classList.remove('visible');
         });
 
         document.querySelectorAll('.theme-square').forEach(function (sq) {
