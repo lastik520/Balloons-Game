@@ -268,28 +268,51 @@
             flex-shrink: 0;
         }
 
+        .holo-tabs {
+            display: flex;
+            align-self: stretch;
+            position: relative;
+        }
+
         .holo-tab {
-            color: #fff;
+            color: #6e6e6e;
             font-size: 21px;
             font-weight: 400;
-            padding: 0 20px;
+            width: 100px;
+            padding: 0;
             cursor: pointer;
             align-self: stretch;
             display: flex;
             align-items: center;
             justify-content: center;
             position: relative;
+            transition: color 0.2s ease;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .holo-tab + .holo-tab::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 1px;
+            height: 54px;
+            background-color: #292929;
         }
         .holo-tab:active { background-color: var(--accent-bg); }
-        .holo-tab::after {
-            content: '';
+        .holo-tab.active { color: #fff; }
+
+        .tab-indicator {
             position: absolute;
             bottom: 0;
             left: 0;
-            width: 100%;
+            width: 0;
             height: 9px;
             background-color: var(--accent);
-            transition: background-color 0.2s ease;
+            pointer-events: none;
+            transition: left 0.24s cubic-bezier(0.22, 1, 0.36, 1),
+                        width 0.24s cubic-bezier(0.22, 1, 0.36, 1),
+                        background-color 0.2s ease;
         }
 
         .menu-balloon-wrap {
@@ -351,9 +374,18 @@
             display: flex;
             flex-direction: column;
             background-color: #000;
+            overflow: hidden;
+        }
+
+        .menu-panel {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
             padding-top: 25px;
             overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
         }
+        .menu-panel.hidden { display: none; }
 
         .list-item {
             width: 100%;
@@ -414,6 +446,86 @@
             transition: color 0.2s ease;
         }
         .list-item:active .play-best { color: #fff; }
+
+        .section-title {
+            color: var(--accent);
+            font-size: 15px;
+            font-weight: 400;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            padding: 0 24px 14px 24px;
+            opacity: 0.75;
+            transition: color 0.2s ease;
+        }
+
+        .leaderboard-section {
+            margin-top: 6px;
+        }
+        .lb-list {
+            display: flex;
+            flex-direction: column;
+        }
+        .lb-row {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 22px 24px;
+            border-bottom: 2px solid #2a2a2a;
+        }
+        .lb-row:first-child { border-top: 2px solid #2a2a2a; }
+
+        .lb-rank {
+            color: #6e6e6e;
+            font-family: 'Roboto', monospace;
+            font-size: 21px;
+            font-weight: 400;
+            font-variant-numeric: tabular-nums;
+            width: 32px;
+            flex-shrink: 0;
+            text-align: left;
+        }
+
+        .lb-name {
+            color: #C3C3C3;
+            font-size: 24px;
+            font-weight: 400;
+            letter-spacing: 0.4px;
+            flex: 1;
+            min-width: 0;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .lb-mode {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 18px;
+            flex-shrink: 0;
+        }
+        .lb-mode .wave-icon {
+            transform: translateY(0) scale(0.8);
+        }
+
+        .lb-score {
+            color: var(--accent);
+            font-family: 'Roboto', monospace;
+            font-size: 25px;
+            font-weight: 400;
+            font-variant-numeric: tabular-nums;
+            letter-spacing: 0.8px;
+            flex-shrink: 0;
+            transition: color 0.2s ease;
+        }
+
+        .lb-row.top .lb-rank { color: var(--accent); }
+        .lb-row.top .lb-name { color: #fff; }
+        .lb-row.top .lb-score { color: var(--accent); }
+
+        .lb-row.empty .lb-name,
+        .lb-row.empty .lb-score,
+        .lb-row.empty .lb-rank { opacity: 0.28; }
 
         .menu-footer {
             margin-top: auto;
@@ -728,7 +840,7 @@
                     <button id="wave-btn" class="nav-btn">
                         <div class="wave-icon"></div>
                     </button>
-                    <span id="alpha-label">Alpha 1.4.0-rc.1</span>
+                    <span id="alpha-label">Alpha 1.4.0-rc.2</span>
                 </div>
                 <span id="score">0</span>
             </div>
@@ -737,7 +849,11 @@
 
     <div id="game-menu">
         <div class="holo-header">
-            <div class="holo-tab" id="tab-game">Game</div>
+            <div class="holo-tabs">
+                <div class="holo-tab active" data-tab="game">Game</div>
+                <div class="holo-tab" data-tab="top">Top</div>
+                <div class="tab-indicator" id="tab-indicator"></div>
+            </div>
             <div class="menu-balloon-wrap" id="menu-balloon" role="button" aria-label="Balloons-Game">
                 <div class="menu-balloon-icon"></div>
             </div>
@@ -745,20 +861,33 @@
         </div>
 
         <div class="menu-content">
-            <div class="list-item" id="start-btn">
-                <div class="item-text">Play</div>
-                <div class="play-best">Best: <span id="menu-best-value">0</span></div>
-            </div>
-            <div class="list-item" id="about-btn">
-                <div class="item-text">How to play</div>
-            </div>
-            <div class="list-item" id="whatsnew-btn">
-                <div class="item-text">What's new</div>
+
+            <div class="menu-panel" data-panel="game">
+                <div class="list-item" id="start-btn">
+                    <div class="item-text">Play</div>
+                    <div class="play-best">Best: <span id="menu-best-value">0</span></div>
+                </div>
+                <div class="list-item" id="about-btn">
+                    <div class="item-text">How to play</div>
+                </div>
+                <div class="list-item" id="whatsnew-btn">
+                    <div class="item-text">What's new</div>
+                </div>
+
+                <div class="menu-footer">
+                    <div class="menu-version">Alpha 1.4.0-rc.2</div>
+                </div>
             </div>
 
-            <div class="menu-footer">
-                <div class="menu-version">Alpha 1.4.0-rc.1</div>
+            <div class="menu-panel hidden" data-panel="top">
+
+                <div class="section-title">Top</div>
+                <div class="leaderboard-section">
+                    <div class="lb-list" id="lb-list"></div>
+                </div>
+
             </div>
+
         </div>
     </div>
 
@@ -799,9 +928,10 @@
 
             <div class="about-body">
                 <ul class="news-list">
+                    <li><b>Leaderboard</b> - Top 10 players in Top pad.</li>
                     <li><b>Best score</b> is now saved on your device.</li>
                     <li><b>Auto-save</b> of your best result when you pause or leave the game.</li>
-                    <li><b>Save game</b> - save score and mode in the pause menu. Load it later from a fresh game.</li>
+                    <li><b>Save game</b> - Save score and mode in pause menu. Load it later from a fresh game.</li>
                     <li><b>Secret</b> - there is a hidden secret in the game. Find it.</li>
                 </ul>
             </div>
@@ -848,6 +978,19 @@
         const BEST_KEY  = 'balloons.best.v1';
         const SAVE_KEY  = 'balloons.save.v1';
 
+        const LEADERBOARD = [
+            { name: 'Lastik', score: 10255, wave: true  },
+            { name: '',       score: null,  wave: false },
+            { name: '',       score: null,  wave: false },
+            { name: '',       score: null,  wave: false },
+            { name: '',       score: null,  wave: false },
+            { name: '',       score: null,  wave: false },
+            { name: '',       score: null,  wave: false },
+            { name: '',       score: null,  wave: false },
+            { name: '',       score: null,  wave: false },
+            { name: '',       score: null,  wave: false }
+        ];
+
         function loadTheme() {
             try {
                 const t = localStorage.getItem(THEME_KEY) || 'blue';
@@ -870,8 +1013,6 @@
             try { localStorage.setItem(BEST_KEY, String(best)); } catch (e) {}
         }
 
-        /* Слот сохранения: { score: number, wave: boolean } в JSON.
-           Поддерживаем и старый формат (просто число). */
         function loadSavedGame() {
             try {
                 const raw = localStorage.getItem(SAVE_KEY);
@@ -946,7 +1087,6 @@
         const startButton = document.getElementById('start-btn');
         const aboutButton = document.getElementById('about-btn');
         const whatsnewButton = document.getElementById('whatsnew-btn');
-        const gameTab = document.getElementById('tab-game');
         const menuBestValue = document.getElementById('menu-best-value');
 
         const aboutOverlay = document.getElementById('about-overlay');
@@ -958,6 +1098,9 @@
         const creditsOverlay = document.getElementById('credits-overlay');
         const creditsClose = document.getElementById('credits-close');
         const menuBalloon = document.getElementById('menu-balloon');
+
+        const lbList = document.getElementById('lb-list');
+        const tabIndicator = document.getElementById('tab-indicator');
 
         let score = 0;
         let best = loadBest();
@@ -979,9 +1122,59 @@
         }
         refreshBestUI();
 
-        /* Логика кнопки Save/Load:
-           - слот пуст  -> "Save game", доступна только если score >= 1
-           - слот занят -> "Load game", доступна только если score === 0  */
+        function renderLeaderboard() {
+            if (!lbList) return;
+            lbList.innerHTML = '';
+
+            for (let i = 0; i < 10; i++) {
+                const entry = LEADERBOARD[i] || null;
+                const isEmpty = !entry ||
+                                entry.name === '' ||
+                                entry.score === null ||
+                                entry.score === undefined;
+
+                const row = document.createElement('div');
+                row.className = 'lb-row' +
+                                (isEmpty ? ' empty' : '') +
+                                (!isEmpty && i === 0 ? ' top' : '');
+
+                const rank = document.createElement('div');
+                rank.className = 'lb-rank';
+                rank.textContent = String(i + 1);
+
+                const name = document.createElement('div');
+                name.className = 'lb-name';
+                name.textContent = isEmpty ? '-' : entry.name;
+
+                const mode = document.createElement('div');
+                mode.className = 'lb-mode';
+                if (!isEmpty && entry.wave) {
+                    const w = document.createElement('div');
+                    w.className = 'wave-icon';
+                    mode.appendChild(w);
+                }
+
+                const scr = document.createElement('div');
+                scr.className = 'lb-score';
+                scr.textContent = isEmpty ? '-' : String(entry.score);
+
+                row.appendChild(rank);
+                row.appendChild(name);
+                row.appendChild(mode);
+                row.appendChild(scr);
+                lbList.appendChild(row);
+            }
+        }
+        renderLeaderboard();
+
+        function trackScoreProgress() {
+            if (score > best) {
+                best = score;
+                saveBest();
+                refreshBestUI();
+            }
+        }
+
         function refreshSaveLoadUI() {
             let label, enabled;
             if (savedGame === null) {
@@ -995,6 +1188,46 @@
             pauseSaveLoad.disabled = !enabled;
         }
         refreshSaveLoadUI();
+
+        function positionTabIndicator(animate) {
+            const activeTab = document.querySelector('.holo-tab.active');
+            if (!activeTab || !tabIndicator) return;
+
+            const left = activeTab.offsetLeft;
+            const width = activeTab.offsetWidth;
+
+            if (animate) {
+                tabIndicator.style.left = left + 'px';
+                tabIndicator.style.width = width + 'px';
+            } else {
+                tabIndicator.style.transition = 'none';
+                tabIndicator.style.left = left + 'px';
+                tabIndicator.style.width = width + 'px';
+                void tabIndicator.offsetWidth;
+                tabIndicator.style.transition = '';
+            }
+        }
+
+        function switchTab(name) {
+            document.querySelectorAll('.holo-tab').forEach(function (t) {
+                t.classList.toggle('active', t.dataset.tab === name);
+            });
+            document.querySelectorAll('.menu-panel').forEach(function (p) {
+                p.classList.toggle('hidden', p.dataset.panel !== name);
+            });
+            if (name === 'top') {
+                renderLeaderboard();
+            }
+            positionTabIndicator(true);
+        }
+
+        document.querySelectorAll('.holo-tab').forEach(function (tab) {
+            tab.addEventListener('click', function () { switchTab(tab.dataset.tab); });
+        });
+
+        requestAnimationFrame(function () { positionTabIndicator(false); });
+
+        window.addEventListener('resize', function () { positionTabIndicator(false); });
 
         function clearAllSpawns() {
             clearTimeout(spawnTimeout);
@@ -1041,11 +1274,8 @@
             isWaveMode = !!startWave;
             applyWaveModeUI(isWaveMode);
 
-            if (score > best) {
-                best = score;
-                saveBest();
-                refreshBestUI();
-            }
+            trackScoreProgress();
+            refreshBestUI();
 
             gameMenu.classList.add('hidden');
             viewport.classList.add('active');
@@ -1058,13 +1288,11 @@
             if (pauseSaveLoad.disabled) return;
 
             if (savedGame === null) {
-                /* SAVE: только если score >= 1 */
                 if (score < 1) return;
                 savedGame = { score: score, wave: isWaveMode };
                 saveGameToSlot(score, isWaveMode);
                 refreshSaveLoadUI();
             } else {
-                /* LOAD: только если score === 0 */
                 if (score !== 0) return;
                 const g = savedGame;
                 savedGame = null;
@@ -1129,12 +1357,7 @@
 
                 score++;
                 scoreEl.textContent = score;
-
-                if (score > best) {
-                    best = score;
-                    saveBest();
-                    refreshBestUI();
-                }
+                trackScoreProgress();
 
                 container.remove();
             };
@@ -1177,8 +1400,6 @@
             scoreEl.textContent = score;
 
             applyWaveModeUI(isWaveMode);
-
-            /* Обновляем доступность кнопки Save/Load */
             refreshSaveLoadUI();
 
             if (isPaused) {
@@ -1249,14 +1470,11 @@
             resetGame();
             viewport.classList.remove('active');
             gameMenu.classList.remove('hidden');
+            switchTab('game');
         });
 
         startButton.addEventListener('click', () => {
             startGameWithScore(0, false);
-        });
-
-        gameTab.addEventListener('click', () => {
-            console.log("Нажата вкладка Game");
         });
 
         aboutButton.addEventListener('click', () => {
