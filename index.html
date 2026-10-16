@@ -221,7 +221,7 @@
 
         .balloon-container { position: absolute; width: 85px; height: 180px; animation: floatUp linear forwards; will-change: transform; z-index: 5; pointer-events: none; }
         .paused { animation-play-state: paused !important; }
-        .balloon { position: absolute; top: 0; left: 0; width: 85px; height: 85px; border-radius: 50%; box-shadow: inset -8px -8px 15px rgba(0,0,0,0.3), inset 8px 8px 15px rgba(255,255,255,0.4); pointer-events: auto; cursor: pointer; }
+        .balloon { position: absolute; top: 0; left: 0; width: 85px; height: 85px; border-radius: 50%; box-shadow: inset -8px -8px 15px rgba(0,0,0,0.3), inset 8px 8px 15px rgba(255,255,255,0.4); pointer-events: none; cursor: pointer; }
         .balloon::before { content: ""; position: absolute; top: 12px; left: 12px; width: 20px; height: 12px; background: rgba(255, 255, 255, 0.5); border-radius: 50%; transform: rotate(-30deg); }
         .balloon::after {
             content: "";
@@ -232,6 +232,17 @@
             border-left: 6px solid transparent;
             border-right: 6px solid transparent;
             border-bottom: 10px solid currentColor;
+        }
+        .balloon-hitbox {
+            position: absolute;
+            top: 0;
+            left: -8px;
+            width: 101px;
+            height: 105px;
+            background: transparent;
+            pointer-events: auto;
+            cursor: pointer;
+            z-index: 1;
         }
         @keyframes floatUp { 0% { transform: translateY(102vh); } 100% { transform: translateY(-200px); } }
 
@@ -453,13 +464,11 @@
             letter-spacing: 0.4px;
         }
 
-        #sound-state,
-        #vibration-state {
+        #sound-state {
             color: var(--accent);
             transition: color 0.2s ease;
         }
-        #sound-toggle.muted #sound-state,
-        #vibration-toggle.muted #vibration-state {
+        #sound-toggle.muted #sound-state {
             color: #6e6e6e;
         }
 
@@ -882,7 +891,7 @@
                     <button id="wave-btn" class="nav-btn">
                         <div class="wave-icon"></div>
                     </button>
-                    <span id="alpha-label">Alpha 1.4.0-rc.3</span>
+                    <span id="alpha-label">Alpha 1.4.0-dev.3</span>
                 </div>
                 <span id="score">0</span>
             </div>
@@ -919,13 +928,9 @@
                     <div class="item-text">Sound:</div>
                     <div class="item-text" id="sound-state">On</div>
                 </div>
-                <div class="list-item list-item-sm" id="vibration-toggle">
-                    <div class="item-text">Vibration:</div>
-                    <div class="item-text" id="vibration-state">On</div>
-                </div>
 
                 <div class="menu-footer">
-                    <div class="menu-version">Alpha 1.4.0-rc.3</div>
+                    <div class="menu-version">Alpha 1.4.0-dev.3</div>
                 </div>
             </div>
 
@@ -1140,7 +1145,6 @@
         const BEST_KEY  = 'balloons.best.v1';
         const SAVE_KEY  = 'balloons.save.v1';
         const SOUND_KEY = 'balloons.sound.v1';
-        const VIBRATION_KEY = 'balloons.vibration.v1';
 
         const LEADERBOARD = [
             { name: 'Lastik',    score: 10255, wave: true  },
@@ -1255,8 +1259,6 @@
 
         const soundToggle = document.getElementById('sound-toggle');
         const soundState = document.getElementById('sound-state');
-        const vibrationToggle = document.getElementById('vibration-toggle');
-        const vibrationState = document.getElementById('vibration-state');
 
         const aboutOverlay = document.getElementById('about-overlay');
         const aboutClose = document.getElementById('about-close');
@@ -1277,29 +1279,11 @@
         } catch (e) {}
         Sfx.setEnabled(soundEnabled);
 
-        let vibrationEnabled = true;
-        try {
-            vibrationEnabled = localStorage.getItem(VIBRATION_KEY) !== 'off';
-        } catch (e) {}
-
-        function vibrate(pattern) {
-            if (!vibrationEnabled) return;
-            if (navigator.vibrate) {
-                try { navigator.vibrate(pattern); } catch (e) {}
-            }
-        }
-
         function updateSoundUI() {
             soundState.textContent = soundEnabled ? 'On' : 'Off';
             soundToggle.classList.toggle('muted', !soundEnabled);
         }
         updateSoundUI();
-
-        function updateVibrationUI() {
-            vibrationState.textContent = vibrationEnabled ? 'On' : 'Off';
-            vibrationToggle.classList.toggle('muted', !vibrationEnabled);
-        }
-        updateVibrationUI();
 
         let score = 0;
         let best = loadBest();
@@ -1423,7 +1407,6 @@
         document.querySelectorAll('.holo-tab').forEach(function (tab) {
             tab.addEventListener('click', function () {
                 Sfx.click();
-                vibrate(10);
                 switchTab(tab.dataset.tab);
             });
         });
@@ -1495,12 +1478,10 @@
                 savedGame = { score: score, wave: isWaveMode };
                 saveGameToSlot(score, isWaveMode);
                 Sfx.save();
-                vibrate(20);
                 refreshSaveLoadUI();
             } else {
                 const g = savedGame;
-                Sfx.click();
-                vibrate(20);
+                Sfx.keyTurn();
                 startGameWithScore(g.score, g.wave);
             }
         }
@@ -1508,6 +1489,7 @@
         function createBalloon() {
             const container = document.createElement('div');
             const balloon = document.createElement('div');
+            const hitbox = document.createElement('div');
 
             let colorIndex = Math.floor(Math.random() * colors.length);
             let guard = 0;
@@ -1519,11 +1501,13 @@
 
             container.className = 'balloon-container';
             balloon.className = 'balloon';
+            hitbox.className = 'balloon-hitbox';
 
             balloon.style.backgroundColor = color;
             balloon.style.color = color;
 
             container.appendChild(balloon);
+            container.appendChild(hitbox);
 
             let leftPos = Math.random() * Math.max(1, viewport.clientWidth - 95) + 5;
             if (lastLeftPosition !== -1 && Math.abs(leftPos - lastLeftPosition) < 70) {
@@ -1542,7 +1526,6 @@
                 e.stopPropagation();
 
                 Sfx.pop();
-                vibrate(20);
 
                 const r = container.getBoundingClientRect();
                 const vr = viewport.getBoundingClientRect();
@@ -1568,8 +1551,8 @@
                 container.remove();
             };
 
-            balloon.addEventListener('touchstart', pop, { passive: false });
-            balloon.addEventListener('mousedown', pop);
+            hitbox.addEventListener('touchstart', pop, { passive: false });
+            hitbox.addEventListener('mousedown', pop);
 
             container.addEventListener('animationend', () => {
                 if (viewport.contains(container)) container.remove();
@@ -1654,32 +1637,27 @@
         pauseBtn.addEventListener('touchstart', (e) => {
             e.preventDefault(); e.stopPropagation();
             Sfx.click();
-            vibrate(15);
             if (isPaused) closePause(); else openPause();
         });
         pauseBtn.addEventListener('click', (e) => {
             e.stopPropagation();
             Sfx.click();
-            vibrate(15);
             if (isPaused) closePause(); else openPause();
         });
 
         waveBtn.addEventListener('touchstart', (e) => {
             e.preventDefault(); e.stopPropagation();
             Sfx.click();
-            vibrate(15);
             toggleWaveMode();
         });
         waveBtn.addEventListener('click', (e) => {
             e.stopPropagation();
             Sfx.click();
-            vibrate(15);
             toggleWaveMode();
         });
 
         pauseContinue.addEventListener('click', () => {
             Sfx.click();
-            vibrate(15);
             closePause();
         });
 
@@ -1690,7 +1668,6 @@
 
         pauseToMenu.addEventListener('click', () => {
             Sfx.click();
-            vibrate(15);
             saveBest();
             pauseOverlay.classList.remove('visible');
             resetGame();
@@ -1701,31 +1678,26 @@
 
         startButton.addEventListener('click', () => {
             Sfx.click();
-            vibrate(15);
             startGameWithScore(0, false);
         });
 
         aboutButton.addEventListener('click', () => {
             Sfx.click();
-            vibrate(10);
             aboutOverlay.classList.add('visible');
         });
 
         aboutClose.addEventListener('click', () => {
             Sfx.click();
-            vibrate(10);
             aboutOverlay.classList.remove('visible');
         });
 
         whatsnewButton.addEventListener('click', () => {
             Sfx.click();
-            vibrate(10);
             newsOverlay.classList.add('visible');
         });
 
         newsClose.addEventListener('click', () => {
             Sfx.click();
-            vibrate(10);
             newsOverlay.classList.remove('visible');
         });
 
@@ -1742,17 +1714,6 @@
             try { localStorage.setItem(SOUND_KEY, soundEnabled ? 'on' : 'off'); } catch (e) {}
             Sfx.setEnabled(soundEnabled);
             updateSoundUI();
-            vibrate(10);
-        });
-
-        vibrationToggle.addEventListener('click', () => {
-            Sfx.click();
-            vibrationEnabled = !vibrationEnabled;
-            try { localStorage.setItem(VIBRATION_KEY, vibrationEnabled ? 'on' : 'off'); } catch (e) {}
-            updateVibrationUI();
-            if (vibrationEnabled) {
-                try { navigator.vibrate && navigator.vibrate(20); } catch (e) {}
-            }
         });
 
         (function initEasterEgg() {
@@ -1797,7 +1758,6 @@
 
         creditsClose.addEventListener('click', () => {
             Sfx.click();
-            vibrate(10);
             creditsOverlay.classList.remove('visible');
         });
 
@@ -1813,7 +1773,6 @@
             sq.addEventListener('click', function (e) {
                 e.stopPropagation();
                 Sfx.click();
-                vibrate(10);
                 applyTheme(sq.dataset.theme);
             });
         });
