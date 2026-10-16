@@ -32,10 +32,15 @@
             --accent-bg: rgba(153, 204, 0, 0.4);
             --bg-gradient: radial-gradient(circle at center, #162a05 0%, #060d01 100%);
         }
-        html[data-theme="pink"] {
-            --accent: #E533E5;
-            --accent-bg: rgba(229, 51, 229, 0.4);
-            --bg-gradient: radial-gradient(circle at center, #330535 0%, #100111 100%);
+        html[data-theme="gold"] {
+            --accent: #E5C033;
+            --accent-bg: rgba(229, 192, 51, 0.4);
+            --bg-gradient: radial-gradient(circle at center, #333005 0%, #110f01 100%);
+        }
+        html[data-theme="teal"] {
+            --accent: #00C2B6;
+            --accent-bg: rgba(0, 194, 182, 0.4);
+            --bg-gradient: radial-gradient(circle at center, #053330 0%, #01110f 100%);
         }
 
         html, body {
@@ -214,9 +219,9 @@
             transition: background-color 0.2s ease;
         }
 
-        .balloon-container { position: absolute; width: 85px; height: 180px; cursor: pointer; animation: floatUp linear forwards; will-change: transform; z-index: 5; }
+        .balloon-container { position: absolute; width: 85px; height: 180px; animation: floatUp linear forwards; will-change: transform; z-index: 5; pointer-events: none; }
         .paused { animation-play-state: paused !important; }
-        .balloon { position: absolute; top: 0; left: 0; width: 85px; height: 85px; border-radius: 50%; box-shadow: inset -8px -8px 15px rgba(0,0,0,0.3), inset 8px 8px 15px rgba(255,255,255,0.4); }
+        .balloon { position: absolute; top: 0; left: 0; width: 85px; height: 85px; border-radius: 50%; box-shadow: inset -8px -8px 15px rgba(0,0,0,0.3), inset 8px 8px 15px rgba(255,255,255,0.4); pointer-events: auto; cursor: pointer; }
         .balloon::before { content: ""; position: absolute; top: 12px; left: 12px; width: 20px; height: 12px; background: rgba(255, 255, 255, 0.5); border-radius: 50%; transform: rotate(-30deg); }
         .balloon::after {
             content: "";
@@ -375,6 +380,7 @@
             flex-direction: column;
             background-color: #000;
             overflow: hidden;
+            min-height: 0;
         }
 
         .menu-panel {
@@ -384,6 +390,8 @@
             padding-top: 25px;
             overflow-y: auto;
             -webkit-overflow-scrolling: touch;
+            touch-action: pan-y;
+            min-height: 0;
         }
         .menu-panel.hidden { display: none; }
 
@@ -393,6 +401,7 @@
             cursor: pointer;
             background-color: #000;
             border: none;
+            flex-shrink: 0;
         }
 
         #start-btn {
@@ -419,7 +428,7 @@
         }
 
         #whatsnew-btn .item-text {
-            margin-left: 7px;
+            margin-left: 6px;
         }
 
         .list-item:active { background-color: var(--accent-bg); }
@@ -431,6 +440,28 @@
             letter-spacing: 0.5px;
         }
         .list-item:active .item-text { color: #fff; }
+
+        .list-item-sm {
+            padding: 16px 24px;
+            border-bottom: 2px solid #2a2a2a;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .list-item-sm .item-text {
+            font-size: 22px;
+            letter-spacing: 0.4px;
+        }
+
+        #sound-state,
+        #vibration-state {
+            color: var(--accent);
+            transition: color 0.2s ease;
+        }
+        #sound-toggle.muted #sound-state,
+        #vibration-toggle.muted #vibration-state {
+            color: #6e6e6e;
+        }
 
         .play-best {
             color: #C3C3C3;
@@ -456,20 +487,23 @@
             padding: 0 24px 14px 24px;
             opacity: 0.75;
             transition: color 0.2s ease;
+            flex-shrink: 0;
         }
 
         .leaderboard-section {
             margin-top: 6px;
+            touch-action: pan-y;
         }
         .lb-list {
             display: flex;
             flex-direction: column;
+            touch-action: pan-y;
         }
         .lb-row {
             display: flex;
             align-items: center;
-            gap: 14px;
-            padding: 22px 24px;
+            gap: 12px;
+            padding: 18px 24px;
             border-bottom: 2px solid #2a2a2a;
         }
         .lb-row:first-child { border-top: 2px solid #2a2a2a; }
@@ -477,17 +511,17 @@
         .lb-rank {
             color: #6e6e6e;
             font-family: 'Roboto', monospace;
-            font-size: 21px;
+            font-size: 17px;
             font-weight: 400;
             font-variant-numeric: tabular-nums;
-            width: 32px;
+            width: 26px;
             flex-shrink: 0;
             text-align: left;
         }
 
         .lb-name {
             color: #C3C3C3;
-            font-size: 24px;
+            font-size: 20px;
             font-weight: 400;
             letter-spacing: 0.4px;
             flex: 1;
@@ -505,13 +539,13 @@
             flex-shrink: 0;
         }
         .lb-mode .wave-icon {
-            transform: translateY(0) scale(0.8);
+            transform: translateY(0) scale(0.75);
         }
 
         .lb-score {
             color: var(--accent);
             font-family: 'Roboto', monospace;
-            font-size: 25px;
+            font-size: 22px;
             font-weight: 400;
             font-variant-numeric: tabular-nums;
             letter-spacing: 0.8px;
@@ -523,6 +557,8 @@
         .lb-row.top .lb-name { color: #fff; }
         .lb-row.top .lb-score { color: var(--accent); }
 
+        .lb-row:nth-child(2):not(.empty) .lb-rank { color: var(--accent); }
+
         .lb-row.empty .lb-name,
         .lb-row.empty .lb-score,
         .lb-row.empty .lb-rank { opacity: 0.28; }
@@ -531,6 +567,7 @@
             margin-top: auto;
             padding: 22px 24px calc(22px + env(safe-area-inset-bottom, 0px)) 24px;
             text-align: right;
+            flex-shrink: 0;
         }
 
         .menu-version {
@@ -577,6 +614,8 @@
             color: #C3C3C3;
             transform: translateY(10px);
             transition: transform 0.25s ease, border-color 0.2s ease;
+            touch-action: pan-y;
+            -webkit-overflow-scrolling: touch;
         }
         #about-overlay.visible #about-box,
         #credits-overlay.visible #credits-box,
@@ -719,12 +758,13 @@
         .theme-picker {
             display: flex;
             justify-content: center;
-            gap: 20px;
+            gap: 14px;
+            flex-wrap: wrap;
         }
 
         .theme-square {
-            width: 46px;
-            height: 46px;
+            width: 42px;
+            height: 42px;
             cursor: pointer;
             border: 3px solid transparent;
             transition: border-color 0.2s ease;
@@ -733,10 +773,12 @@
         }
         .theme-square.selected[data-theme="blue"]  { border-color: #7dd8f5; }
         .theme-square.selected[data-theme="green"] { border-color: #ccff33; }
-        .theme-square.selected[data-theme="pink"]  { border-color: #ff99ff; }
+        .theme-square.selected[data-theme="gold"]  { border-color: #f5e08c; }
+        .theme-square.selected[data-theme="teal"]  { border-color: #7ee6df; }
         .theme-square[data-theme="blue"]  { background-color: #33B5E5; }
         .theme-square[data-theme="green"] { background-color: #99CC00; }
-        .theme-square[data-theme="pink"]  { background-color: #E533E5; }
+        .theme-square[data-theme="gold"]  { background-color: #E5C033; }
+        .theme-square[data-theme="teal"]  { background-color: #00C2B6; }
 
         #pause-overlay {
             position: fixed;
@@ -840,7 +882,7 @@
                     <button id="wave-btn" class="nav-btn">
                         <div class="wave-icon"></div>
                     </button>
-                    <span id="alpha-label">Alpha 1.4.0-rc.2</span>
+                    <span id="alpha-label">Alpha 1.4.0-rc.3</span>
                 </div>
                 <span id="score">0</span>
             </div>
@@ -873,9 +915,17 @@
                 <div class="list-item" id="whatsnew-btn">
                     <div class="item-text">What's new</div>
                 </div>
+                <div class="list-item list-item-sm" id="sound-toggle">
+                    <div class="item-text">Sound:</div>
+                    <div class="item-text" id="sound-state">On</div>
+                </div>
+                <div class="list-item list-item-sm" id="vibration-toggle">
+                    <div class="item-text">Vibration:</div>
+                    <div class="item-text" id="vibration-state">On</div>
+                </div>
 
                 <div class="menu-footer">
-                    <div class="menu-version">Alpha 1.4.0-rc.2</div>
+                    <div class="menu-version">Alpha 1.4.0-rc.3</div>
                 </div>
             </div>
 
@@ -945,12 +995,13 @@
             <h2>Balloons-Game</h2>
 
             <div class="credits-body">
-                <p class="credits-authors">Created by skillizkrek and Denisdio7</p>
+                <p class="credits-authors">Created by lastik520 and Denisdio7</p>
 
                 <div class="theme-picker">
                     <button class="theme-square" data-theme="blue"  aria-label="Blue theme"></button>
                     <button class="theme-square" data-theme="green" aria-label="Green theme"></button>
-                    <button class="theme-square" data-theme="pink"  aria-label="Pink theme"></button>
+                    <button class="theme-square" data-theme="gold"  aria-label="Gold theme"></button>
+                    <button class="theme-square" data-theme="teal"  aria-label="Teal theme"></button>
                 </div>
             </div>
 
@@ -974,13 +1025,126 @@
     </div>
 
     <script>
+        // Звуковой движок в стиле обычного клика мышью / тапа по экрану.
+        // Основа — очень короткий шумовой транзиент через полосовой фильтр
+        // плюс едва слышный тон «корпуса». Сухой, щёлкающий, без реверба.
+        const Sfx = (function () {
+            let ctx = null;
+            let enabled = true;
+            let master = null;
+            let noiseBuf = null;
+
+            function ensure() {
+                if (!enabled) return null;
+                if (!ctx) {
+                    try {
+                        ctx = new (window.AudioContext || window.webkitAudioContext)();
+
+                        const out = ctx.createGain();
+                        out.gain.value = 0.85;
+
+                        const lp = ctx.createBiquadFilter();
+                        lp.type = 'lowpass';
+                        lp.frequency.value = 11000;
+                        lp.Q.value = 0.2;
+
+                        out.connect(lp).connect(ctx.destination);
+                        master = out;
+
+                        const len = Math.floor(ctx.sampleRate * 0.25);
+                        noiseBuf = ctx.createBuffer(1, len, ctx.sampleRate);
+                        const data = noiseBuf.getChannelData(0);
+                        for (let i = 0; i < len; i++) data[i] = Math.random() * 2 - 1;
+                    } catch (e) { ctx = null; }
+                }
+                if (ctx && ctx.state === 'suspended') {
+                    try { ctx.resume(); } catch (e) {}
+                }
+                return ctx;
+            }
+
+            function setEnabled(on) { enabled = !!on; }
+            function isEnabled() { return enabled; }
+
+            function clickAt(freq, q, dur, vol, delay) {
+                const c = ensure();
+                if (!c) return;
+                const t0 = c.currentTime + (delay || 0);
+
+                const src = c.createBufferSource();
+                src.buffer = noiseBuf;
+
+                const bp = c.createBiquadFilter();
+                bp.type = 'bandpass';
+                bp.frequency.setValueAtTime(freq, t0);
+                bp.Q.value = q;
+
+                const g = c.createGain();
+                g.gain.setValueAtTime(0.0001, t0);
+                g.gain.linearRampToValueAtTime(vol, t0 + 0.0012);
+                g.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
+
+                src.connect(bp).connect(g).connect(master);
+                src.start(t0);
+                src.stop(t0 + dur + 0.02);
+
+                const osc = c.createOscillator();
+                osc.type = 'triangle';
+                osc.frequency.setValueAtTime(freq * 0.6, t0);
+
+                const og = c.createGain();
+                og.gain.setValueAtTime(0.0001, t0);
+                og.gain.linearRampToValueAtTime(vol * 0.35, t0 + 0.0012);
+                og.gain.exponentialRampToValueAtTime(0.0001, t0 + dur * 0.5);
+
+                osc.connect(og).connect(master);
+                osc.start(t0);
+                osc.stop(t0 + dur + 0.02);
+            }
+
+            function click() {
+                clickAt(2400, 6, 0.030, 0.22, 0);
+                clickAt(5200, 9, 0.018, 0.07, 0);
+            }
+
+            function pop() {
+                const d = 1 + (Math.random() * 0.10 - 0.05);
+                clickAt(1500 * d, 4, 0.055, 0.30, 0);
+                clickAt(3200 * d, 7, 0.025, 0.14, 0);
+                clickAt(700  * d, 3, 0.045, 0.12, 0.006);
+            }
+
+            function save() {
+                clickAt(2600, 7, 0.028, 0.22, 0);
+                clickAt(2000, 6, 0.030, 0.20, 0.075);
+            }
+
+            function keyTurn() {
+                clickAt(1800, 6, 0.028, 0.19, 0);
+                clickAt(2200, 6, 0.028, 0.20, 0.09);
+                clickAt(2700, 7, 0.032, 0.22, 0.18);
+            }
+
+            return {
+                unlock: ensure,
+                pop, click, save, keyTurn,
+                setEnabled, isEnabled
+            };
+        })();
+
+        window.addEventListener('touchstart', () => Sfx.unlock(), { once: true, passive: true });
+        window.addEventListener('mousedown', () => Sfx.unlock(), { once: true });
+        window.addEventListener('keydown', () => Sfx.unlock(), { once: true });
+
         const THEME_KEY = 'balloons.theme';
         const BEST_KEY  = 'balloons.best.v1';
         const SAVE_KEY  = 'balloons.save.v1';
+        const SOUND_KEY = 'balloons.sound.v1';
+        const VIBRATION_KEY = 'balloons.vibration.v1';
 
         const LEADERBOARD = [
-            { name: 'Lastik', score: 10255, wave: true  },
-            { name: '',       score: null,  wave: false },
+            { name: 'Lastik',    score: 10255, wave: true  },
+            { name: 'Denisdio7', score: 4242,  wave: true  },
             { name: '',       score: null,  wave: false },
             { name: '',       score: null,  wave: false },
             { name: '',       score: null,  wave: false },
@@ -994,7 +1158,7 @@
         function loadTheme() {
             try {
                 const t = localStorage.getItem(THEME_KEY) || 'blue';
-                return (t === 'green' || t === 'pink' || t === 'blue') ? t : 'blue';
+                return (t === 'green' || t === 'gold' || t === 'teal' || t === 'blue') ? t : 'blue';
             } catch (e) { return 'blue'; }
         }
 
@@ -1019,7 +1183,7 @@
                 if (raw === null) return null;
                 try {
                     const obj = JSON.parse(raw);
-                    if (obj && typeof obj === 'object' && typeof obj.score === 'number') {
+                    if (obj && typeof obj === 'object' && typeof obj.score === 'number' && obj.score > 0) {
                         return {
                             score: obj.score,
                             wave: !!obj.wave
@@ -1027,7 +1191,7 @@
                     }
                 } catch (e) {}
                 const n = parseInt(raw, 10);
-                if (!isNaN(n)) return { score: n, wave: false };
+                if (!isNaN(n) && n > 0) return { score: n, wave: false };
                 return null;
             } catch (e) { return null; }
         }
@@ -1046,7 +1210,7 @@
         }
 
         function applyTheme(theme) {
-            if (theme !== 'blue' && theme !== 'green' && theme !== 'pink') theme = 'blue';
+            if (theme !== 'blue' && theme !== 'green' && theme !== 'gold' && theme !== 'teal') theme = 'blue';
             document.documentElement.setAttribute('data-theme', theme);
             document.querySelectorAll('.theme-square').forEach(function (sq) {
                 sq.classList.toggle('selected', sq.dataset.theme === theme);
@@ -1089,6 +1253,11 @@
         const whatsnewButton = document.getElementById('whatsnew-btn');
         const menuBestValue = document.getElementById('menu-best-value');
 
+        const soundToggle = document.getElementById('sound-toggle');
+        const soundState = document.getElementById('sound-state');
+        const vibrationToggle = document.getElementById('vibration-toggle');
+        const vibrationState = document.getElementById('vibration-state');
+
         const aboutOverlay = document.getElementById('about-overlay');
         const aboutClose = document.getElementById('about-close');
 
@@ -1101,6 +1270,36 @@
 
         const lbList = document.getElementById('lb-list');
         const tabIndicator = document.getElementById('tab-indicator');
+
+        let soundEnabled = true;
+        try {
+            soundEnabled = localStorage.getItem(SOUND_KEY) !== 'off';
+        } catch (e) {}
+        Sfx.setEnabled(soundEnabled);
+
+        let vibrationEnabled = true;
+        try {
+            vibrationEnabled = localStorage.getItem(VIBRATION_KEY) !== 'off';
+        } catch (e) {}
+
+        function vibrate(pattern) {
+            if (!vibrationEnabled) return;
+            if (navigator.vibrate) {
+                try { navigator.vibrate(pattern); } catch (e) {}
+            }
+        }
+
+        function updateSoundUI() {
+            soundState.textContent = soundEnabled ? 'On' : 'Off';
+            soundToggle.classList.toggle('muted', !soundEnabled);
+        }
+        updateSoundUI();
+
+        function updateVibrationUI() {
+            vibrationState.textContent = vibrationEnabled ? 'On' : 'Off';
+            vibrationToggle.classList.toggle('muted', !vibrationEnabled);
+        }
+        updateVibrationUI();
 
         let score = 0;
         let best = loadBest();
@@ -1176,16 +1375,16 @@
         }
 
         function refreshSaveLoadUI() {
-            let label, enabled;
             if (savedGame === null) {
-                label = 'Save game';
-                enabled = (score >= 1);
+                pauseSaveLoad.textContent = 'Save game';
+                pauseSaveLoad.disabled = (score < 1);
+            } else if (score >= 1) {
+                pauseSaveLoad.textContent = 'Overwrite save';
+                pauseSaveLoad.disabled = false;
             } else {
-                label = 'Load game';
-                enabled = (score === 0);
+                pauseSaveLoad.textContent = 'Load game (' + savedGame.score + ')';
+                pauseSaveLoad.disabled = false;
             }
-            pauseSaveLoad.textContent = label;
-            pauseSaveLoad.disabled = !enabled;
         }
         refreshSaveLoadUI();
 
@@ -1222,7 +1421,11 @@
         }
 
         document.querySelectorAll('.holo-tab').forEach(function (tab) {
-            tab.addEventListener('click', function () { switchTab(tab.dataset.tab); });
+            tab.addEventListener('click', function () {
+                Sfx.click();
+                vibrate(10);
+                switchTab(tab.dataset.tab);
+            });
         });
 
         requestAnimationFrame(function () { positionTabIndicator(false); });
@@ -1287,17 +1490,17 @@
         function handleSaveLoad() {
             if (pauseSaveLoad.disabled) return;
 
-            if (savedGame === null) {
+            if (savedGame === null || score >= 1) {
                 if (score < 1) return;
                 savedGame = { score: score, wave: isWaveMode };
                 saveGameToSlot(score, isWaveMode);
+                Sfx.save();
+                vibrate(20);
                 refreshSaveLoadUI();
             } else {
-                if (score !== 0) return;
                 const g = savedGame;
-                savedGame = null;
-                clearSaveSlot();
-                refreshSaveLoadUI();
+                Sfx.click();
+                vibrate(20);
                 startGameWithScore(g.score, g.wave);
             }
         }
@@ -1338,6 +1541,9 @@
                 e.preventDefault();
                 e.stopPropagation();
 
+                Sfx.pop();
+                vibrate(20);
+
                 const r = container.getBoundingClientRect();
                 const vr = viewport.getBoundingClientRect();
 
@@ -1362,8 +1568,8 @@
                 container.remove();
             };
 
-            container.addEventListener('touchstart', pop, { passive: false });
-            container.addEventListener('mousedown', pop);
+            balloon.addEventListener('touchstart', pop, { passive: false });
+            balloon.addEventListener('mousedown', pop);
 
             container.addEventListener('animationend', () => {
                 if (viewport.contains(container)) container.remove();
@@ -1447,17 +1653,35 @@
 
         pauseBtn.addEventListener('touchstart', (e) => {
             e.preventDefault(); e.stopPropagation();
+            Sfx.click();
+            vibrate(15);
             if (isPaused) closePause(); else openPause();
         });
         pauseBtn.addEventListener('click', (e) => {
             e.stopPropagation();
+            Sfx.click();
+            vibrate(15);
             if (isPaused) closePause(); else openPause();
         });
 
-        waveBtn.addEventListener('touchstart', (e) => { e.preventDefault(); e.stopPropagation(); toggleWaveMode(); });
-        waveBtn.addEventListener('click', (e) => { e.stopPropagation(); toggleWaveMode(); });
+        waveBtn.addEventListener('touchstart', (e) => {
+            e.preventDefault(); e.stopPropagation();
+            Sfx.click();
+            vibrate(15);
+            toggleWaveMode();
+        });
+        waveBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            Sfx.click();
+            vibrate(15);
+            toggleWaveMode();
+        });
 
-        pauseContinue.addEventListener('click', closePause);
+        pauseContinue.addEventListener('click', () => {
+            Sfx.click();
+            vibrate(15);
+            closePause();
+        });
 
         pauseSaveLoad.addEventListener('click', (e) => {
             e.stopPropagation();
@@ -1465,6 +1689,8 @@
         });
 
         pauseToMenu.addEventListener('click', () => {
+            Sfx.click();
+            vibrate(15);
             saveBest();
             pauseOverlay.classList.remove('visible');
             resetGame();
@@ -1474,23 +1700,59 @@
         });
 
         startButton.addEventListener('click', () => {
+            Sfx.click();
+            vibrate(15);
             startGameWithScore(0, false);
         });
 
         aboutButton.addEventListener('click', () => {
+            Sfx.click();
+            vibrate(10);
             aboutOverlay.classList.add('visible');
         });
 
         aboutClose.addEventListener('click', () => {
+            Sfx.click();
+            vibrate(10);
             aboutOverlay.classList.remove('visible');
         });
 
         whatsnewButton.addEventListener('click', () => {
+            Sfx.click();
+            vibrate(10);
             newsOverlay.classList.add('visible');
         });
 
         newsClose.addEventListener('click', () => {
+            Sfx.click();
+            vibrate(10);
             newsOverlay.classList.remove('visible');
+        });
+
+        soundToggle.addEventListener('click', () => {
+            if (soundEnabled) {
+                Sfx.click();
+                soundEnabled = false;
+            } else {
+                soundEnabled = true;
+                Sfx.setEnabled(true);
+                Sfx.unlock();
+                Sfx.click();
+            }
+            try { localStorage.setItem(SOUND_KEY, soundEnabled ? 'on' : 'off'); } catch (e) {}
+            Sfx.setEnabled(soundEnabled);
+            updateSoundUI();
+            vibrate(10);
+        });
+
+        vibrationToggle.addEventListener('click', () => {
+            Sfx.click();
+            vibrationEnabled = !vibrationEnabled;
+            try { localStorage.setItem(VIBRATION_KEY, vibrationEnabled ? 'on' : 'off'); } catch (e) {}
+            updateVibrationUI();
+            if (vibrationEnabled) {
+                try { navigator.vibrate && navigator.vibrate(20); } catch (e) {}
+            }
         });
 
         (function initEasterEgg() {
@@ -1534,6 +1796,8 @@
         })();
 
         creditsClose.addEventListener('click', () => {
+            Sfx.click();
+            vibrate(10);
             creditsOverlay.classList.remove('visible');
         });
 
@@ -1548,6 +1812,8 @@
         document.querySelectorAll('.theme-square').forEach(function (sq) {
             sq.addEventListener('click', function (e) {
                 e.stopPropagation();
+                Sfx.click();
+                vibrate(10);
                 applyTheme(sq.dataset.theme);
             });
         });
