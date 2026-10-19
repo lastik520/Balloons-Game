@@ -164,6 +164,7 @@
         }
         .nav-btn.active-mode { opacity: 1; }
 
+        /* ИСПРАВЛЕНО: bottom: -2.5px (золотая середина) */
         .pause-balloon-icon {
             width: 16px;
             height: 16px;
@@ -175,7 +176,7 @@
         .pause-balloon-icon::after {
             content: "";
             position: absolute;
-            bottom: -3px;
+            bottom: -2.5px;
             left: 50%;
             transform: translateX(-50%);
             border-left: 3px solid transparent;
@@ -222,15 +223,25 @@
             background-color: var(--accent);
         }
 
+        /* Контейнер выше самого шарика (180 vs 85) — пустое место под шариком тоже ловит нажатие.
+           Нажатие ловит сам браузер (нативный hit-test), без расчётов в JS. */
         .balloon-container {
             position: absolute;
             top: 0; left: 0;
-            width: 85px; height: 180px;
+            width: calc(85px * var(--fs, 1));
+            height: calc(180px * var(--fs, 1));
             animation: floatUp linear forwards;
             will-change: transform;
             z-index: 5;
-            pointer-events: none;
-            backface-visibility: hidden;
+        }
+        /* Невидимый запас по бокам и сверху */
+        .balloon-container::before {
+            content: "";
+            position: absolute;
+            top: calc(-10px * var(--fs, 1));
+            left: calc(-10px * var(--fs, 1));
+            right: calc(-10px * var(--fs, 1));
+            bottom: 0;
         }
         .paused { animation-play-state: paused !important; }
 
@@ -263,9 +274,10 @@
             border-bottom: 10px solid currentColor;
         }
 
+        /* Старт чуть ниже нижнего края (как в стабильной версии), высота берётся из JS на каждый шарик */
         @keyframes floatUp {
-            0%   { transform: translate3d(0, 130vh, 0); }
-            100% { transform: translate3d(0, -200px, 0); }
+            0%   { transform: translate3d(0, var(--start-y, 102vh), 0); }
+            100% { transform: translate3d(0, calc(-200px * var(--fs, 1)), 0); }
         }
 
         .particle {
@@ -313,6 +325,8 @@
         #news-box * {
             touch-action: pan-y;
         }
+
+        #game-menu .scale-slider { touch-action: none; }
 
         .holo-header {
             display: flex;
@@ -592,7 +606,7 @@
         .lb-row {
             display: flex;
             align-items: center;
-            gap: 12px;
+            gap: 10px;
             padding: 18px 24px;
             border-bottom: 2px solid #2a2a2a;
         }
@@ -608,7 +622,7 @@
         }
 
         .lb-name {
-            color: #C3C3C3;
+            color: #fff;
             font-size: 20px;
             flex: 1;
             min-width: 0;
@@ -621,8 +635,30 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            width: 18px;
+            gap: 4px;
             flex-shrink: 0;
+        }
+        .lb-speed {
+            color: var(--accent);
+            font-family: 'Roboto', monospace;
+            font-size: 14px;
+            letter-spacing: 0.3px;
+            opacity: 0.8;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .lb-note {
+            padding: 4px 24px 16px 24px;
+            color: #8a8a8a;
+            font-size: 15px;
+            line-height: 1.45;
+        }
+        .lb-note .lb-contact {
+            color: var(--accent);
+            word-break: break-all;
+            -webkit-user-select: text;
+            user-select: text;
+            touch-action: manipulation;
         }
         .lb-mode .wave-icon { transform: translateY(0) scale(0.75); }
 
@@ -636,13 +672,11 @@
         }
 
         .lb-row.top .lb-rank { color: var(--accent); }
-        .lb-row.top .lb-name { color: #fff; }
         .lb-row.top .lb-score { color: var(--accent); }
         .lb-row:nth-child(2):not(.empty) .lb-rank { color: var(--accent); }
         .lb-row.empty .lb-name,
         .lb-row.empty .lb-score,
         .lb-row.empty .lb-rank { opacity: 0.28; }
-        .lb-row.me .lb-name { color: var(--accent); }
 
         .menu-footer {
             margin-top: auto;
@@ -1016,7 +1050,7 @@
                         <button id="wave-btn" class="nav-btn">
                             <div class="wave-icon"></div>
                         </button>
-                        <span id="alpha-label">Alpha 1.4.0-beta</span>
+                        <span id="alpha-label">Alpha 1.4.0-rc</span>
                     </div>
                     <span id="score">0</span>
                 </div>
@@ -1078,12 +1112,13 @@
                     </div>
 
                     <div class="menu-footer">
-                        <div class="menu-version">Alpha 1.4.0-beta</div>
+                        <div class="menu-version">Alpha 1.4.0-rc</div>
                     </div>
                 </div>
 
                 <div class="menu-panel hidden" data-panel="top">
                     <div class="section-title">Top</div>
+                    <div class="lb-note">To get into the Top, you need to submit a request: <span class="lb-contact">crimsonclutt3r@gmail.com</span></div>
                     <div class="leaderboard-section">
                         <div class="lb-list" id="lb-list"></div>
                     </div>
@@ -1113,7 +1148,7 @@
                             <div class="control-icon">
                                 <div class="wave-icon"></div>
                             </div>
-                            <div class="control-text"><b>Double arrow</b> - Wave mode. Opens a speed selector (1x - 6x).</div>
+                            <div class="control-text"><b>Double arrow</b> - Wave mode. Opens a speed selector (1x - 5x).</div>
                         </div>
                     </div>
                 </div>
@@ -1126,17 +1161,13 @@
                 <h2>What's new</h2>
                 <div class="about-body">
                     <ul class="news-list">
-                        <li><b>Wave speed</b> - pick any speed from 1x to 6x using the slider when you enable wave mode.</li>
-                        <li><b>Scrollable menu</b> - lists and leaderboard can now be scrolled naturally.</li>
-                        <li><b>Game scale</b> - scale the entire game UI in the Game menu.</li>
-                        <li><b>Field scale</b> - resize the play field in the Game menu.</li>
-                        <li><b>Better hit detection</b> - balloons pop reliably, even on fast taps.</li>
-                        <li><b>Performance</b> - smoother gameplay on low-end devices.</li>
+                        <li><b>Wave speed</b> - Pick any speed from 1x to 5x using the slider when you enable wave mode.</li>
+                        <li><b>Game scale</b> - Scale the entire game UI in the Game menu.</li>
+                        <li><b>Field scale</b> - Resize the play field in the Game menu.</li>
                         <li><b>Leaderboard</b> - Top 10 players in Top pad.</li>
                         <li><b>Best score</b> is now saved on your device.</li>
-                        <li><b>Auto-save</b> of your best result when you pause or leave the game.</li>
                         <li><b>Save game</b> - Save score and mode in pause menu.</li>
-                        <li><b>Secret</b> - there is a hidden secret in the game. Find it.</li>
+                        <li><b>Secret</b> - There is a hidden secret in the game. Find it.</li>
                     </ul>
                 </div>
                 <button class="about-close" id="news-close">Close</button>
@@ -1147,7 +1178,7 @@
             <div id="credits-box">
                 <h2>Balloons-Game</h2>
                 <div class="credits-body">
-                    <p class="credits-authors">Created by lastik520 and Denisdio7</p>
+                    <p class="credits-authors">Created by lastik520 and denkajoyan-afk</p>
                     <div class="theme-picker">
                         <button class="theme-square" data-theme="blue"  aria-label="Blue theme"></button>
                         <button class="theme-square" data-theme="green" aria-label="Green theme"></button>
@@ -1193,7 +1224,6 @@
                         <span>3x</span>
                         <span>4x</span>
                         <span>5x</span>
-                        <span>6x</span>
                     </div>
                     <div class="speed-default-note">default <span>3.2x</span></div>
                 </div>
@@ -1318,21 +1348,20 @@
         const WAVE_SPEED_KEY = 'balloons.wavespeed.v1';
 
         const BALLOON_SIZE = 85;
-        const HIT_PADDING  = 16;
         const MAX_BALLOONS = 28;
-        const SCALE_STEPS  = [0.75, 1, 1.25, 1.5];
-        const GAME_SCALE_STEPS = [0.8, 1, 1.15, 1.35];
+        const SCALE_STEPS  = [1, 1.25, 1.5];
+        const GAME_SCALE_STEPS = [0.8, 1, 1.15];
 
         const SPEED_MIN = 1;
-        const SPEED_MAX = 6;
+        const SPEED_MAX = 5;
         const SPEED_DEFAULT = 3.2;
 
-        const SPEED_SNAP = [1, 2, 3, 3.2, 4, 5, 6];
+        const SPEED_SNAP = [1, 2, 3, 3.2, 4, 5];
         const SPEED_SNAP_THRESHOLD = 0.09;
 
         const LEADERBOARD = [
-            { name: 'Lastik',    score: 10255, wave: true  },
-            { name: 'Denisdio7', score: 4242,  wave: true  },
+            { name: 'Lastik',    score: 10255, wave: true,  speed: 3.2 },
+            { name: 'denkajoyan-afk', score: 4242,  wave: true,  speed: 3.2 },
             { name: '',          score: null,  wave: false },
             { name: '',          score: null,  wave: false },
             { name: '',          score: null,  wave: false },
@@ -1388,10 +1417,18 @@
         applyTheme(loadTheme());
 
         document.addEventListener('gesturestart', e => e.preventDefault());
-        document.addEventListener('selectstart', e => e.preventDefault());
+        document.addEventListener('selectstart', function (e) {
+            const t = e.target;
+            if (t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA')) return;
+            e.preventDefault();
+        });
         document.addEventListener('wheel', (e) => { if (e.ctrlKey) e.preventDefault(); }, { passive: false });
         document.addEventListener('dblclick', e => e.preventDefault(), { passive: false });
-        document.addEventListener('contextmenu', e => e.preventDefault());
+        document.addEventListener('contextmenu', function (e) {
+            const t = e.target;
+            if (t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA')) return;
+            e.preventDefault();
+        });
 
         const viewport = document.getElementById('phone-viewport');
         const scoreEl = document.getElementById('score');
@@ -1465,6 +1502,11 @@
             } catch (e) {}
         })();
 
+        let viewportRect = null;
+        function updateViewportRect() {
+            viewportRect = viewport.getBoundingClientRect();
+        }
+
         function applyScale(s, persist) {
             fieldScale = s;
             viewport.style.setProperty('--fs', String(s));
@@ -1482,7 +1524,13 @@
             if (persist !== false) {
                 try { localStorage.setItem(SCALE_GAME_KEY, String(s)); } catch (e) {}
             }
-            requestAnimationFrame(function () { positionTabIndicator(false); });
+            requestAnimationFrame(function () {
+                viewportW = viewport.clientWidth;
+                viewportH = viewport.clientHeight;
+                recentLefts.length = 0;
+                positionTabIndicator(false);
+                updateViewportRect();
+            });
         }
 
         applyScale(fieldScale, false);
@@ -1595,7 +1643,7 @@
         (function initWaveSpeed() {
             try {
                 const v = parseFloat(localStorage.getItem(WAVE_SPEED_KEY));
-                if (!isNaN(v) && v >= SPEED_MIN && v <= SPEED_MAX) waveSpeed = v;
+                if (!isNaN(v) && v >= SPEED_MIN) waveSpeed = Math.min(v, SPEED_MAX);
             } catch (e) {}
         })();
 
@@ -1690,8 +1738,20 @@
 
         const activeBalloons = new Set();
         let viewportW = viewport.clientWidth;
+        let viewportH = viewport.clientHeight;
 
         let bestSaveTimer = null;
+        let pauseStartTime = 0;
+
+        function pauseAllBalloons() {
+            activeBalloons.forEach(function (b) { b.classList.add('paused'); });
+        }
+
+        function resumeAllBalloons() {
+            activeBalloons.forEach(function (b) { b.classList.add('paused'); });
+            void viewport.offsetHeight;
+            activeBalloons.forEach(function (b) { b.classList.remove('paused'); });
+        }
 
         function refreshBestUI() {
             menuBestValue.textContent = best;
@@ -1703,12 +1763,7 @@
             if (!lbList) return;
             const frag = document.createDocumentFragment();
 
-            const rows = LEADERBOARD.slice();
-            if (best > 0) {
-                rows.push({ name: 'You', score: best, wave: isWaveMode, me: true });
-                rows.sort(function (a, b) { return (b.score || 0) - (a.score || 0); });
-                rows.length = 10;
-            }
+            const rows = LEADERBOARD;
 
             for (let i = 0; i < 10; i++) {
                 const entry = rows[i] || null;
@@ -1717,8 +1772,7 @@
                 const row = document.createElement('div');
                 row.className = 'lb-row'
                     + (isEmpty ? ' empty' : '')
-                    + (!isEmpty && i === 0 ? ' top' : '')
-                    + (!isEmpty && entry.me ? ' me' : '');
+                    + (!isEmpty && i === 0 ? ' top' : '');
 
                 const rank = document.createElement('div');
                 rank.className = 'lb-rank';
@@ -1734,6 +1788,12 @@
                     const w = document.createElement('div');
                     w.className = 'wave-icon';
                     mode.appendChild(w);
+                    if (entry.speed) {
+                        const sp = document.createElement('span');
+                        sp.className = 'lb-speed';
+                        sp.textContent = entry.speed + 'x';
+                        mode.appendChild(sp);
+                    }
                 }
 
                 const scr = document.createElement('div');
@@ -1757,21 +1817,28 @@
                 best = score;
                 refreshBestUI();
                 if (!bestSaveTimer) {
+                    // localStorage синхронный и может «подвесить» кадр на слабых телефонах,
+                    // поэтому пишем редко (плюс при паузе / сворачивании / выходе)
                     bestSaveTimer = setTimeout(function () {
                         bestSaveTimer = null;
                         saveBest();
-                    }, 500);
+                    }, 5000);
                 }
             }
         }
 
+        // Счёт на момент последнего нажатия «Save / Overwrite». Пока не набрано ещё очко — кнопка неактивна.
+        let saveLockScore = null;
+
         function refreshSaveLoadUI() {
+            if (saveLockScore !== null && score > saveLockScore) saveLockScore = null;
+
             if (savedGame === null) {
                 pauseSaveLoad.textContent = 'Save game';
                 pauseSaveLoad.disabled = (score < 1);
             } else if (score >= 1) {
                 pauseSaveLoad.textContent = 'Overwrite save';
-                pauseSaveLoad.disabled = false;
+                pauseSaveLoad.disabled = (saveLockScore !== null);
             } else {
                 pauseSaveLoad.textContent = 'Load game (' + savedGame.score + ')';
                 pauseSaveLoad.disabled = false;
@@ -1819,7 +1886,7 @@
         window.addEventListener('resize', function () { positionTabIndicator(false); });
 
         const Particles = (function () {
-            const POOL_SIZE = 72;
+            const POOL_SIZE = 60;
             const nodes = [];
             let cursor = 0;
             let ready = false;
@@ -1850,7 +1917,7 @@
                     }
 
                     const angle = (i / count) * Math.PI * 2 + Math.random() * 0.5;
-                    const dist = Math.random() * 60 + 40;
+                    const dist = Math.random() * 55 + 35;
                     const dx = (Math.cos(angle) * dist).toFixed(1);
                     const dy = (Math.sin(angle) * dist).toFixed(1);
 
@@ -1864,7 +1931,7 @@
                             { transform: 'translate(-50%, -50%) translate(0px, 0px) scale(1)', opacity: 1 },
                             { transform: 'translate(-50%, -50%) translate(' + dx + 'px, ' + dy + 'px) scale(0)', opacity: 0 }
                         ],
-                        { duration: 420, easing: 'cubic-bezier(0.2, 0.7, 0.4, 1)', fill: 'forwards' }
+                        { duration: 380, easing: 'cubic-bezier(0.2, 0.7, 0.4, 1)', fill: 'forwards' }
                     );
 
                     p._anim = anim;
@@ -1877,7 +1944,7 @@
                 }
             }
 
-            return { burst: burst };
+            return { burst: burst, init: init };
         })();
 
         function clearAllSpawns() {
@@ -1906,6 +1973,7 @@
         function resetGame() {
             clearAllSpawns();
             removeAllBalloons();
+            saveLockScore = null;
             score = 0;
             scoreEl.textContent = score;
             isPaused = false;
@@ -1913,6 +1981,7 @@
             modeChangedOnPause = false;
             gameStarted = false;
             recentLefts.length = 0;
+            pauseStartTime = 0;
             pauseBtn.classList.remove('active-mode');
             waveBtn.classList.remove('active-mode');
             alphaLabel.classList.remove('active-mode');
@@ -1934,6 +2003,10 @@
 
         function startGameWithScore(startScore, startWave) {
             resetGame();
+            viewportW = viewport.clientWidth;
+            viewportH = viewport.clientHeight;
+            updateViewportRect();
+            recentLefts.length = 0;
             score = startScore;
             scoreEl.textContent = score;
             isWaveMode = !!startWave;
@@ -1941,6 +2014,8 @@
 
             trackScoreProgress();
             refreshBestUI();
+            Particles.init();
+            Sfx.unlock();
 
             gameMenu.classList.add('hidden');
             viewport.classList.add('active');
@@ -1955,6 +2030,7 @@
                 if (score < 1) return;
                 savedGame = { score: score, wave: isWaveMode };
                 saveGameToSlot(score, isWaveMode);
+                saveLockScore = score;
                 Sfx.save();
                 refreshSaveLoadUI();
             } else {
@@ -1989,7 +2065,7 @@
         }
 
         function getSpeedFactor() {
-            return 3.2 / waveSpeed;
+            return SPEED_DEFAULT / waveSpeed;
         }
 
         function createBalloon() {
@@ -2006,23 +2082,22 @@
 
             const container = document.createElement('div');
             container.className = 'balloon-container';
-            container.dataset.color = color;
+            container._color = color;
 
             const balloon = document.createElement('div');
             balloon.className = 'balloon';
             balloon.style.backgroundColor = color;
             balloon.style.color = color;
-
             container.appendChild(balloon);
 
             const bw = BALLOON_SIZE * fieldScale;
             container.style.left = pickLeftPosition(bw) + 'px';
             container.style.animationDuration = getBalloonDuration() + 's';
+            // Старт сразу под нижним краем поля (как в стабильной версии)
+            container.style.setProperty('--start-y', Math.round(viewportH * 1.02) + 'px');
 
             viewport.appendChild(container);
             activeBalloons.add(container);
-
-            if (isPaused) container.classList.add('paused');
         }
 
         function gameLoop() {
@@ -2048,70 +2123,43 @@
         }
 
         function popBalloon(container) {
-            if (container.dataset.popped) return;
-            container.dataset.popped = '1';
-            activeBalloons.delete(container);
+            // защита от двойного срабатывания
+            if (!activeBalloons.delete(container)) return;
 
-            const rect = container.getBoundingClientRect();
+            // читаем геометрию до удаления (для центра взрыва)
+            const r = container.getBoundingClientRect();
             const vr = viewport.getBoundingClientRect();
-            const sizeLocal = BALLOON_SIZE * fieldScale;
+            const cx = (r.left + (BALLOON_SIZE * fieldScale * gameScale) / 2 - vr.left) / gameScale;
+            const cy = (r.top + (BALLOON_SIZE * fieldScale * gameScale) / 2 - vr.top) / gameScale;
 
-            const cx = (rect.left - vr.left) / gameScale + sizeLocal / 2;
-            const cy = (rect.top - vr.top) / gameScale + sizeLocal / 2;
-
-            Particles.burst(cx, cy, container.dataset.color || '#ffffff', 12);
-            Sfx.pop();
-
-            if (navigator.vibrate) {
-                try { navigator.vibrate(8); } catch (e) {}
-            }
-
+            // 1) мгновенный визуальный отклик
+            container.remove();
             score++;
             scoreEl.textContent = score;
+            Particles.burst(cx, cy, container._color || '#ffffff', 10);
             trackScoreProgress();
 
-            container.remove();
-        }
-
-        function handleFieldTap(e) {
-            if (!gameStarted || isPaused) return;
-            if (e.isPrimary === false) return;
-
-            const t = e.target;
-            if (t && t.closest && t.closest('#ui-wrapper')) return;
-
-            if (e.cancelable) e.preventDefault();
-
-            if (activeBalloons.size === 0) return;
-
-            const vr = viewport.getBoundingClientRect();
-            const px = (e.clientX - vr.left) / gameScale;
-            const py = (e.clientY - vr.top) / gameScale;
-            const sizeLocal = BALLOON_SIZE * fieldScale;
-
-            let target = null;
-            let bestDist = Infinity;
-
-            activeBalloons.forEach(function (c) {
-                const r = c.getBoundingClientRect();
-                const l = (r.left - vr.left) / gameScale;
-                const top = (r.top - vr.top) / gameScale;
-
-                if (px >= l - HIT_PADDING && px <= l + sizeLocal + HIT_PADDING &&
-                    py >= top - HIT_PADDING && py <= top + sizeLocal + HIT_PADDING) {
-
-                    const cxx = l + sizeLocal / 2;
-                    const cyy = top + sizeLocal / 2;
-                    const d = (px - cxx) * (px - cxx) + (py - cyy) * (py - cyy);
-
-                    if (d < bestDist) { bestDist = d; target = c; }
-                }
+            // 2) звук и вибрация — сразу после отрисовки кадра, чтобы не задерживать сам взрыв
+            requestAnimationFrame(function () {
+                setTimeout(function () {
+                    Sfx.pop();
+                    if (navigator.vibrate) {
+                        try { navigator.vibrate(8); } catch (e) {}
+                    }
+                }, 0);
             });
-
-            if (target) popBalloon(target);
         }
 
-        viewport.addEventListener('pointerdown', handleFieldTap, { passive: false });
+        // Нативный hit-test: касание ловит сам шарик (как в стабильной версии), один обработчик на всё поле
+        viewport.addEventListener('pointerdown', function (e) {
+            if (!gameStarted || isPaused) return;
+            const t = e.target;
+            if (!t || !t.closest) return;
+            const container = t.closest('.balloon-container');
+            if (!container) return;
+            if (e.cancelable) e.preventDefault();
+            popBalloon(container);
+        }, { passive: false });
 
         viewport.addEventListener('animationend', function (e) {
             const t = e.target;
@@ -2126,17 +2174,13 @@
             updateSpeedUI();
             speedOverlay.classList.add('visible');
             clearAllSpawns();
-            activeBalloons.forEach(function (b) { b.classList.add('paused'); });
+            pauseAllBalloons();
         }
 
         function closeSpeedDialog(resume) {
             speedOverlay.classList.remove('visible');
             if (resume) {
-                activeBalloons.forEach(function (b) {
-                    b.classList.add('paused');
-                    void b.offsetHeight;
-                    b.classList.remove('paused');
-                });
+                resumeAllBalloons();
                 mainSpawnTimer = setTimeout(gameLoop, 300);
             }
         }
@@ -2150,6 +2194,7 @@
             isWaveMode = true;
             applyWaveModeUI(true);
             removeAllBalloons();
+            saveLockScore = null;
             score = 0;
             scoreEl.textContent = score;
             refreshSaveLoadUI();
@@ -2166,6 +2211,7 @@
             isWaveMode = false;
             applyWaveModeUI(false);
             removeAllBalloons();
+            saveLockScore = null;
             score = 0;
             scoreEl.textContent = score;
             refreshSaveLoadUI();
@@ -2185,7 +2231,7 @@
             pauseScoreValue.textContent = score;
             pauseBestValue.textContent = best;
             clearAllSpawns();
-            activeBalloons.forEach(function (b) { b.classList.add('paused'); });
+            pauseAllBalloons();
             pauseOverlay.classList.add('visible');
             saveBest();
             refreshSaveLoadUI();
@@ -2197,11 +2243,7 @@
             pauseBtn.classList.remove('active-mode');
             pauseOverlay.classList.remove('visible');
 
-            activeBalloons.forEach(function (b) {
-                b.classList.add('paused');
-                void b.offsetHeight;
-                b.classList.remove('paused');
-            });
+            resumeAllBalloons();
 
             if (modeChangedOnPause) {
                 modeChangedOnPause = false;
@@ -2376,9 +2418,11 @@
             resizeRaf = requestAnimationFrame(function () {
                 resizeRaf = 0;
                 viewportW = viewport.clientWidth;
+                viewportH = viewport.clientHeight;
                 recentLefts.length = 0;
                 fieldSlider.render();
                 gameSlider.render();
+                updateViewportRect();
             });
         });
 
